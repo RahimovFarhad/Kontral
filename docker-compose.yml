@@ -1,0 +1,23 @@
+services:
+  db:
+    container_name: job_post
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: farhadrehimov
+      POSTGRES_PASSWORD: Javid_App
+      POSTGRES_DB: job_post
+      PGDATA: /data/job_post
+    volumes:
+      - db:/data/job_post
+    ports:
+      - "5333:5432"
+    networks:
+      - db
+    restart: unless-stopped
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:

@@ -1,0 +1,25 @@
+1) Enable soft delete: add isDelete instead of brute-forcing delete action
+
+3) Use masking and search about other ways to legally store sensitive data like user's name, address, and etc.
+
+4) Add something like an Admin Key or API key 
+
+5) Add actually checking permission to view getMySavedPosts and getSavedPostsByPostId
+
+6) Send verification message to email when registered
+
+7) Add follow functionality
+
+8) dtolardaki User, Post kkimi entityleri idleri ile evezle
+
+9) in some services, you use list, in some page. correct this
+
+10) Make notification a generic class
+
+11) when user gets a new jwt, expire if any current jwt they have
+
+
+
+
+
+P.S I have an isActive field and SetActive function for files, but for now, I will not use it in the ui

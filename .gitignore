@@ -1,0 +1,43 @@
+### Maven ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+out/
+
+### VS Code ###
+.vscode/
+
+### Logs ###
+*.log
+logs/
+*.out
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+
+### Environment / Secrets ###
+.env
+*.local
+
+### Java ###
+*.class
+
+### Package Managers ###
+node_modules/
+
+### Docker ###
+**/docker-data/
+**/postgres-data/
+
+### Build Artifacts ###
+*.jar
+*.war
+
+### Cache ###
+.cache/
