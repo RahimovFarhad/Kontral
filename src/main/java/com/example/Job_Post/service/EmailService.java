@@ -19,7 +19,7 @@ public class EmailService {
 
     // private static final String FRONTEND_URL = "http://localhost:5173";
     private static final String FRONTEND_URL = "https://kontral.onrender.com";
-    private static final String BACKEND_URL = "http://localhost:8080";
+    private static final String BACKEND_URL = "https://kontral-backend.onrender.com";
 
     public void sendVerificationEmail(String email, String verificationToken) {
         String subject = "Email Verification";
