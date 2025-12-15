@@ -81,7 +81,7 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     oAuth2Handler.generateJwtForOAuth2User(authentication, response);
                     // String redirectUrl = "http://localhost:5173/";
-                    String redirectUrl = "https://kontral-frontend-1.onrender.com";
+                    String redirectUrl = "https://kontral.onrender.com";
 
                     // Send JWT in JSON instead of redirect
                     response.sendRedirect(redirectUrl);
@@ -103,7 +103,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://kontral-frontend-1.onrender.com"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://kontral.onrender.com"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));

@@ -39,7 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
     .addInterceptors(jwtHandshakeInterceptor)
-    .setAllowedOriginPatterns("http://localhost:5173", "https://kontral-frontend-1.onrender.com") // Allow specific origin for CORS
+    .setAllowedOriginPatterns("http://localhost:5173", "https://kontral.onrender.com") // Allow specific origin for CORS
     .withSockJS(); // Enable SockJS fallback options
   }
 
