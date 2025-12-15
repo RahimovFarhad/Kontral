@@ -4,14 +4,13 @@ package com.example.Job_Post.service;
 
 import com.cloudinary.*;
 import com.cloudinary.utils.ObjectUtils;
-import io.github.cdimascio.dotenv.Dotenv;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,8 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileUploadService {
     // Set your Cloudinary credentials
 
-    Dotenv dotenv = Dotenv.load();
-    Cloudinary cloudinary = new Cloudinary(dotenv.get("CLOUDINARY_URL"));
+    private final Cloudinary cloudinary;
+
+    public FileUploadService(
+            @Value("${CLOUDINARY_URL}") String cloudinaryUrl
+    ) {
+        this.cloudinary = new Cloudinary(cloudinaryUrl);
+    }
 
     @SuppressWarnings("rawtypes")
     public String upload(MultipartFile file, String customFileName, String resource_type) throws IOException {
