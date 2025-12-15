@@ -7,28 +7,34 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.example.Job_Post.enumerator.TokenType;
-
-
 import org.springframework.stereotype.Service;
-
 import com.example.Job_Post.entity.User;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class JwtService {
 
-    // do with .env later
-    static Dotenv dotenv = Dotenv.load();
-    private static final String SECRET_KEY = dotenv.get("SECRET_KEY");
+    private static SecretKey SIGNING_KEY;
 
+    @Value("${SECRET_KEY}")
+    private String secret;
 
+    @PostConstruct
+    public void init() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("SECRET_KEY env var is missing");
+        }
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        SIGNING_KEY = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public static String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -39,9 +45,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-
     private static Claims extractAllClaims(String token) {
-        // System.out.println("🪪 JWT before parsing: " + token);
         if (token == null || token.trim().isEmpty()) {
             throw new IllegalArgumentException("❌ JWT is null or empty before parsing.");
         }
@@ -54,12 +58,9 @@ public class JwtService {
             .getPayload();
     }
 
-
     private static SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes); 
+        return SIGNING_KEY;
     }
- 
 
     public static boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
@@ -70,38 +71,38 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-
     public static Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-
     public static String generateToken(User user, TokenType tokenType) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("type", tokenType.name().toLowerCase()); // "access" or "refresh"
+        claims.put("type", tokenType.name().toLowerCase());
         return generateToken(claims, user, tokenType);
     }
 
-
     public static String generateToken(Map<String, Object> extraClaims, User user, TokenType tokenType) {
-        int time = (tokenType.equals(TokenType.REFRESH)) ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 10;
+        int time = (tokenType.equals(TokenType.REFRESH))
+                ? 1000 * 60 * 60 * 24 * 7
+                : 1000 * 60 * 10;
 
         return Jwts
             .builder()
             .subject(user.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new  Date(System.currentTimeMillis() + time)) // 10 hours
+            .expiration(new Date(System.currentTimeMillis() + time))
             .signWith(getSignInKey())
             .claims(extraClaims)
             .compact();
     }
+
     public static String generateTokenByEmail(String email, TokenType tokenType) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", tokenType.name().toLowerCase());
-        
-        int time = (tokenType.equals(TokenType.REFRESH)) 
-            ? 1000 * 60 * 60 * 24 * 7 
-            : 1000 * 60 * 10;
+
+        int time = (tokenType.equals(TokenType.REFRESH))
+                ? 1000 * 60 * 60 * 24 * 7
+                : 1000 * 60 * 10;
 
         return Jwts.builder()
             .subject(email)
@@ -123,19 +124,10 @@ public class JwtService {
 
     public static boolean isTokenSignatureValid(String token) {
         try {
-            extractAllClaims(token); // will throw if invalid
+            extractAllClaims(token);
             return true;
         } catch (Exception e) {
             return false;
         }
     }
-
-
-
-
-    
-
-    
-
-
 }
