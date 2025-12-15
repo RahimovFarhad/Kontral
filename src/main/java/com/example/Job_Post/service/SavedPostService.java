@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.SavedPost;
 import com.example.Job_Post.entity.User;
@@ -21,11 +22,12 @@ public class SavedPostService  {
 
     private final PostService postService;
     private final UserService userService;
+    private final CurrentUser cUser;
 
 
     public SavedPost create(Integer postId) {
         Post post = postService.getPostById(postId);
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         Optional <SavedPost> existingSavedPost = savedPostRepository.findByPostIdAndUserId(postId, currentUser.getId());
 
@@ -52,7 +54,7 @@ public class SavedPostService  {
     }
 
     public Page<SavedPost> getMySavedPosts(Pageable pageable){
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         return savedPostRepository.findByUser(currentUser, pageable);
 
@@ -74,7 +76,7 @@ public class SavedPostService  {
 
 
     public String delete(Integer postId) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         SavedPost post = getSavedPostByPostIdAndUserId(postId, currentUser.getId());
         savedPostRepository.delete(post);
 

@@ -65,8 +65,12 @@ public class RegisterService {
             .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
 
             // If the email exists and the auth method is Custom, we throw an error
-            if (user.getAuthMethod().equals(AuthMethod.Custom) && authMethod.equals(AuthMethod.Custom) && user.getVerified()) {
-                throw new IllegalArgumentException("Email already exists");
+            if (user.getAuthMethod().equals(AuthMethod.Custom) && authMethod.equals(AuthMethod.Custom)) {
+                if (user.getVerified())
+                    throw new IllegalArgumentException("Email already exists");
+                else if(user.getVerificationTokenHash() != null && !LocalDateTime.now().isAfter(user.getVerificationTokenExpiry())){
+                    throw new IllegalArgumentException("A Verification Link Already Sent");
+                }
             }
             // If the email exists but the auth method is OAuth2, we can proceed without throwing an error
             if (authMethod.equals(AuthMethod.Custom)) {
@@ -132,7 +136,7 @@ public class RegisterService {
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false) // localhost
+                    .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
                     .path("/api/v1/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)

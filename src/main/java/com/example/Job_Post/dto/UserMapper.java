@@ -1,5 +1,7 @@
 package com.example.Job_Post.dto;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.example.Job_Post.entity.Company;
@@ -55,38 +57,20 @@ public class UserMapper {
         return userDTO;
     }
 
-    public ChatUserDTO toChatDTO(User user, Boolean hasUnseenMessage) {
-        if (user == null) {
-            return null;
-        }
+    public ChatUserDTO toChatDTO(User user, boolean hasUnseen) {
+        if (user == null) return null;
 
-        // Map normally first
-        UserDTO baseDto = toDTO(user);
+        ChatUserDTO dto = new ChatUserDTO();
+        dto.setId(user.getId());
+        dto.setNickName(user.getNickName() != null ? user.getNickName() : user.getEmail());
+        dto.setEmail(user.getEmail());
+        dto.setStatus(user.getStatus());
+        dto.setHasUnseenMessageToCurrentUser(hasUnseen);
+        dto.setImageUrl(user.getImageUrl());
 
-        // Create ChatUserDTO and copy fields
-        ChatUserDTO chatDto = new ChatUserDTO();
-        chatDto.setId(baseDto.getId());
-        chatDto.setNickName(baseDto.getNickName());
-        chatDto.setEmail(baseDto.getEmail());
-        chatDto.setStatus(baseDto.getStatus());
-        chatDto.setAboutMe(baseDto.getAboutMe());
-        chatDto.setProfileImage(baseDto.getProfileImage());
-        chatDto.setAverageRating(baseDto.getAverageRating());
-        chatDto.setCreatedAt(baseDto.getCreatedAt());
-        chatDto.setUpdatedAt(baseDto.getUpdatedAt());
-        chatDto.setSkills(baseDto.getSkills());
-        chatDto.setFiles(baseDto.getFiles());
-        chatDto.setNumber(baseDto.getNumber());
-        chatDto.setNewNotificationCount(baseDto.getNewNotificationCount());
-        chatDto.setNewChatMessageCount(baseDto.getNewChatMessageCount());
-        chatDto.setLinkedIn(baseDto.getLinkedIn());
-
-        // Extra property
-        chatDto.setHasUnseenMessageToCurrentUser(hasUnseenMessage);
-            
-
-        return chatDto;
+        return dto;
     }
+
 
     
 
@@ -131,14 +115,14 @@ public class UserMapper {
         if (userDTO.getSkills() != null) {
             user.setSkills(userDTO.getSkills().stream()
                 .map(skillDTO -> skillMapper.toEntity(skillDTO))
-                .toList());
+                .collect(Collectors.toSet()));
         }
         
         // Handle files mapping
         if (userDTO.getFiles() != null) {
             user.setFiles(userDTO.getFiles().stream()
                 .map(fileDTO -> fileMapper.toEntity(fileDTO))
-                .toList());
+                .collect(Collectors.toSet()));
         }
 
         

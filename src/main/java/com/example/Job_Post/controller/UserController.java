@@ -178,6 +178,7 @@ public class UserController {
             
             return res;
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
         }                         
     }
@@ -271,6 +272,7 @@ public class UserController {
             UserDTO user = userMapper.toDTO(userService.getUserByEmail(principal.getName()));
             return ResponseEntity.ok(user);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Failed to retrieve users: " + e.getMessage());
 
         }

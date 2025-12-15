@@ -24,6 +24,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
         "WHERE m.recipient.id = :currentUserId AND m.isRead = false")
     Set<Integer> findSendersWithUnreadMessages(@Param("currentUserId") Integer currentUserId);
 
+    @Query("""
+        SELECT cm FROM ChatMessage cm
+        WHERE cm.id = :id
+    """)
+    ChatMessage getChatMessageByIdLightweight(Integer id);
+
 
     
 }

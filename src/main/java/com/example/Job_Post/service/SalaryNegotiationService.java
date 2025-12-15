@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.SalaryNegotiationDTO;
 import com.example.Job_Post.dto.SalaryNegotiationMapper;
 import com.example.Job_Post.entity.JobApplication;
@@ -29,6 +30,7 @@ public class SalaryNegotiationService {
     private final SalaryNegotiationMapper salaryNegotiationMapper;
     private final UserService userService;
     private final JobApplicationRepository jobApplicationRepository;
+    private final CurrentUser cUser;
 
     public SalaryNegotiation initiateSalaryNegotiation(Integer jobApplicationId) {
 
@@ -48,7 +50,7 @@ public class SalaryNegotiationService {
         negotiation.setStatus(NegotiationStatus.ACTIVE);
         negotiation.setJobApplication(jobApp);
 
-        User currentUser = userService.getCurrentUser(); // Implement this method to get the current user
+        User currentUser = cUser.get();
         
         User applicant = jobApp.getCreator(); // or jobApp.getApplicant() if renamed
         if (!currentUser.getId().equals(applicant.getId())) {
@@ -80,7 +82,7 @@ public class SalaryNegotiationService {
         }
    
 
-        User currentUser = userService.getCurrentUser(); // Implement this method to get the current user
+        User currentUser = cUser.get();
 
         JobApplication jobApp = negotiation.getJobApplication();
         List<SalaryOffer> offers = negotiation.getOffers();
@@ -117,7 +119,7 @@ public class SalaryNegotiationService {
         SalaryOffer offer = salaryOfferRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found with id: " + offerId));
         
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         JobApplication jobApp = offer.getNegotiation().getJobApplication();
         if (!jobApp.getCreator().getId().equals(currentUser.getId()) &&
             !jobApp.getPost().getCreator().getId().equals(currentUser.getId())) {
@@ -148,7 +150,7 @@ public class SalaryNegotiationService {
         SalaryOffer offer = salaryOfferRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("Offer not found with id: " + offerId));
 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         JobApplication jobApp = offer.getNegotiation().getJobApplication();
         if (!jobApp.getCreator().getId().equals(currentUser.getId()) &&
             !jobApp.getPost().getCreator().getId().equals(currentUser.getId())) {
@@ -172,7 +174,7 @@ public class SalaryNegotiationService {
         SalaryNegotiation negotiation = salaryNegotiationRepository.findById(negotiationId)
                 .orElseThrow(() -> new IllegalArgumentException("Negotiation not found with id: " + negotiationId));
 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         JobApplication jobApp = negotiation.getJobApplication();
         if (!jobApp.getCreator().getId().equals(currentUser.getId()) &&
             !jobApp.getPost().getCreator().getId().equals(currentUser.getId())) {

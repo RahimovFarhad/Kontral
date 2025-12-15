@@ -3,13 +3,16 @@ package com.example.Job_Post.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.example.Job_Post.dto.UserWebSocketDTO;
 import com.example.Job_Post.enumerator.AuthMethod;
 import com.example.Job_Post.enumerator.Role;
 import com.example.Job_Post.enumerator.Status;
@@ -29,6 +32,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -66,17 +70,17 @@ public class User implements UserDetails {
 
     private String linkedIn;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<Skill> skills = new ArrayList<>();
+    private Set<Skill> skills = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<File> files = new ArrayList<>();
+    private Set<File> files = new HashSet<>();
 
-    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<JobApplication> jobApplications = new ArrayList<>();
+    private Set<JobApplication> jobApplications = new HashSet<>();
 
     @Column(unique = true)
     private String email;
@@ -157,6 +161,12 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id, email);
+    }
+
+
+    @Transient
+    public UserWebSocketDTO toWebSocketDTO() {
+        return new UserWebSocketDTO(this.id, this.email, this.nickName, this.status);
     }
     
 }

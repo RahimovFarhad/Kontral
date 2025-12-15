@@ -46,7 +46,7 @@ public class OAuth2Handler {
 
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false) // localhost
+                    .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
                     .path("/api/v1/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)

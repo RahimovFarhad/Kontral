@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.example.Job_Post.config.JwtService;
 import com.example.Job_Post.dto.ChatMessageDTO;
 import com.example.Job_Post.dto.ChatMessageMapper;
+import com.example.Job_Post.dto.UserWebSocketDTO;
 import com.example.Job_Post.entity.ChatMessage;
 import com.example.Job_Post.entity.ChatNotification;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.repository.UserRepository;
 import com.example.Job_Post.service.ChatMessageService;
 import com.example.Job_Post.service.UserService;
 
@@ -34,38 +36,32 @@ public class ChatController {
     private final ChatMessageMapper chatMessageMapper;
 
     private final ChatMessageService chatMessageService;
+    private final UserRepository userRepository;
 
     @MessageMapping("/read")
-    public void setMessageRead(@Payload ChatMessageDTO chatMessageDTO, @Header("Authorization") String token) throws IllegalAccessException{
-        if (token == null || token.isEmpty() || !token.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Authorization token is required");
-        }
+        public void setMessageRead(@Payload ChatMessageDTO chatMessageDTO, 
+            Principal principal) throws IllegalAccessException {
 
-        final String jwt;
-        final String username;
-
-        jwt = token.substring(7); // Extract the JWT from the header 
-        username = JwtService.extractUsername(jwt); // Extract username from the JWT
-
-
-        if (username == null) {
+        if (principal == null) {
             throw new IllegalStateException("User not authenticated");
         }
 
-        User user = userService.getUserByEmail(username);
+        String username = principal.getName();
+
+        UserWebSocketDTO user = userRepository.findWebSocketUserByEmail(username);
 
         ChatMessage chatMessage = chatMessageService.getChatMessageById(chatMessageDTO.getId());
 
-        if (!chatMessage.getRecipient().equals(user)){
-            throw new IllegalAccessException("Only recipient can read the message. Current user: " + username + " recipient: " + chatMessage.getRecipient().getEmail());
+        if (!chatMessage.getRecipient().getId().equals(user.getId())) {
+            throw new IllegalAccessException(
+                "Only recipient can read this message"
+            );
         }
 
         chatMessageService.setMessageIsRead(chatMessage.getId());
 
-
-
         messagingTemplate.convertAndSendToUser(
-            chatMessage.getSender().getEmail(), 
+            chatMessage.getSender().getEmail(),
             "/queue/messageStatus",
             ChatNotification.builder()
                 .id(chatMessage.getId())
@@ -75,35 +71,28 @@ public class ChatController {
     }
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessageDTO chatMessageDTO, @Header("Authorization") String token) { //on real app, use principal for better security
-        if (token == null || token.isEmpty() || !token.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Authorization token is required");
-        }
+    public void processMessage(@Payload ChatMessageDTO chatMessageDTO, Principal principal) {
 
-        final String jwt;
-        final String username;
-
-        jwt = token.substring(7); // Extract the JWT from the header 
-        username = JwtService.extractUsername(jwt); // Extract username from the JWT
-
-        if (username == null) {
+        if (principal == null) {
             throw new IllegalStateException("User not authenticated");
         }
 
-        User user = userService.getUserByEmail(username);
+        String username = principal.getName();
+
+        User sender = userService.getUserByEmail(username);
 
         ChatMessage chatMessage = chatMessageMapper.toEntity(chatMessageDTO);
-        chatMessage.setSender(user);
+        chatMessage.setSender(sender);
 
-        if (chatMessage.getSender().getId().equals(chatMessage.getRecipient().getId())){
+        if (chatMessage.getSender().getId().equals(chatMessage.getRecipient().getId())) {
             throw new IllegalArgumentException("Cannot send message to yourself");
         }
 
         ChatMessage savedMessage = chatMessageService.saveMessage(chatMessage);
 
-
+        // Send to recipient
         messagingTemplate.convertAndSendToUser(
-            savedMessage.getRecipient().getEmail(), 
+            savedMessage.getRecipient().getEmail(),
             "/queue/messages",
             ChatNotification.builder()
                 .id(savedMessage.getId())
@@ -114,8 +103,9 @@ public class ChatController {
                 .build()
         );
 
+        // Send confirmation to sender (replace tempId)
         messagingTemplate.convertAndSendToUser(
-            savedMessage.getSender().getEmail(), 
+            savedMessage.getSender().getEmail(),
             "/queue/sentMessage",
             ChatNotification.builder()
                 .tempId(chatMessageDTO.getTempId())
@@ -123,7 +113,6 @@ public class ChatController {
                 .timestamp(savedMessage.getTimestamp())
                 .build()
         );
-
     }
 
     @GetMapping("/messages/{senderId}/{recipientId}")

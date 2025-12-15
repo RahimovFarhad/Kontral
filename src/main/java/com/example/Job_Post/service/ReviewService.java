@@ -1,14 +1,13 @@
 package com.example.Job_Post.service;
 
-import org.springframework.boot.autoconfigure.batch.BatchProperties.Job;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.ReviewDTO;
 import com.example.Job_Post.dto.ReviewMapper;
 import com.example.Job_Post.entity.JobApplication;
-import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.Review;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.NotificationType;
@@ -26,6 +25,7 @@ public class ReviewService {
     private final JobApplicationService jobApplicationService;
 
     private final ReviewMapper reviewMapper;
+    private final CurrentUser cUser;
 
     public ReviewDTO create(
         String review, 
@@ -34,7 +34,7 @@ public class ReviewService {
     ) {
         JobApplication jobApplication = jobApplicationService.getJobApplicationById(jobApplicationId);
 
-        User writer = userService.getCurrentUser();
+        User writer = cUser.get();
         Boolean isByEmployer = writer.getId().equals(jobApplication.getPost().getCreator().getId());
 
         if (!isByEmployer && jobApplication.getCreator().getId() != writer.getId()) {
@@ -81,7 +81,7 @@ public class ReviewService {
         Review currentReview = reviewRepository.findById(reviewId)
                                     .orElseThrow(() -> new IllegalArgumentException("Unable to find review by id: " + reviewId));
 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         
         if (!currentUser.getId().equals(currentReview.getWriter().getId())){
             throw new IllegalAccessException("Only the creator of this review can edit it");
@@ -120,7 +120,7 @@ public class ReviewService {
         Review currentReview = reviewRepository.findById(reviewId)
                                     .orElseThrow(() -> new IllegalArgumentException("Unable to find review by id: " + reviewId));
                                 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         
         if (!currentUser.getId().equals(currentReview.getWriter().getId())){
             throw new IllegalAccessException("Only the creator of this review can edit it");

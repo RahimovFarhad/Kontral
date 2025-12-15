@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.ChatUserDTO;
 import com.example.Job_Post.dto.UserDTO;
 import com.example.Job_Post.dto.UserMapper;
@@ -25,12 +26,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final ChatMessageRepository chatMessageRepository;
-
-    public User getCurrentUser(){
-        return this.userRepository.findByEmail(
-            SecurityContextHolder.getContext().getAuthentication().getName()
-        ).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    }
+    private final CurrentUser cUser;
 
     public User connectUser(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -128,16 +124,22 @@ public class UserService {
     }
 
     public List<ChatUserDTO> getChatUsers() {
-        User currentUser = getCurrentUser();
-        Set<Integer> sendersWithUnread = chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
+        User currentUser = cUser.get();
 
-        List<User> users = userRepository.findAll();
+        Set<Integer> sendersWithUnread =
+                chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
 
-        return users.stream()
-            .map(u -> userMapper.toChatDTO(u, sendersWithUnread.contains(u.getId())))
-            .toList();
+        List<ChatUserDTO> users = userRepository.findAllChatUsersLight();
 
+        // Set the unseen message flag
+        for (ChatUserDTO u : users) {
+            u.setHasUnseenMessageToCurrentUser(
+                    sendersWithUnread.contains(u.getId())
+            );
         }
+
+        return users;
+    }
 
     
     

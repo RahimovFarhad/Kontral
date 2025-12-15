@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.SavedPostRepository;
-import com.example.Job_Post.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class PostMapper {
     private final UserMapper userMapper;
     private final SavedPostRepository savedPostRepository;
-    private final UserService userService;
+    private final CurrentUser cUser;
     
     public Post toEntity(PostDTO postDTO) {
         if (postDTO == null) {
@@ -52,6 +52,7 @@ public class PostMapper {
             return null;
         }        
 
+        System.out.println("\nhey\n");
         PostDTO postDTO = PostDTO.builder()
                 .id(post.getId())
                 .poster(userMapper.toDTO(post.getCreator()))
@@ -78,7 +79,7 @@ public class PostMapper {
                 .build();
 
         try {
-            User currentUser = userService.getCurrentUser();
+            User currentUser = cUser.get();
             postDTO.setIsSavedByCurrentUser(savedPostRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId()));
         } catch (Exception e) {
         }

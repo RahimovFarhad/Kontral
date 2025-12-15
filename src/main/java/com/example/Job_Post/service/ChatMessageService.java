@@ -51,12 +51,10 @@ public class ChatMessageService {
             .orElseThrow(() -> new IllegalStateException("Chat Message not found"));
     }
 
-    public ChatMessage setMessageIsRead(Integer id) {
-        ChatMessage chatMessage = chatMessageRepository.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Chat Message not found"));
-
-        chatMessage.setIsRead(true);
-        return chatMessageRepository.save(chatMessage);
+    public void setMessageIsRead(Integer messageId) {
+        ChatMessage msg = chatMessageRepository.getChatMessageByIdLightweight(messageId);
+        msg.setIsRead(true);
+        chatMessageRepository.save(msg);
     }
 
 }

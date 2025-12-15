@@ -5,9 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.NotificationDTO;
 import com.example.Job_Post.dto.NotificationMapper;
-import com.example.Job_Post.entity.ChatNotification;
 import com.example.Job_Post.entity.Notification;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.NotificationType;
@@ -21,11 +21,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
     private final NotificationContentGenerator notificationContentGenerator;
 
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationMapper notificationMapper;
+
+    private final CurrentUser cUser;
 
 
     public Notification sendNotification(User receiver, NotificationType type, SubjectType subjectType, Integer subjectId) {
@@ -71,7 +72,8 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Notification cannot be found with id: " + id));
 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
+
 
         if (!notification.getNotifiedUser().equals(currentUser)){
             throw new IllegalAccessException("Notification does not belong to the current user");
@@ -82,7 +84,8 @@ public class NotificationService {
 
     public Page<Notification> getAllMyNotifications(Pageable pageable) {
         // Logic to retrieve all notifications for the current user with pagination
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
+
         
         return notificationRepository.findByNotifiedUserId(currentUser.getId(), pageable); 
     }

@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.JobApplicationDTO;
 import com.example.Job_Post.dto.JobApplicationMapper;
 import com.example.Job_Post.entity.ChatMessage;
@@ -37,18 +38,16 @@ public class JobApplicationService {
     private final JobApplicationMapper jobApplicationMapper;
     private final PostService postService;
     private final NotificationService notificationService;
-
-    private final UserService userService;
-
     private final ChatMessageService chatMessageService;
     private final SimpMessagingTemplate messagingTemplate;
 
     private final SalaryNegotiationRepository salaryNegotiationRepository;
+    private final CurrentUser cUser;
 
 
     public JobApplicationDTO apply(JobApplicationDTO request) {        
         request.setStatus(JobApplicationStatus.APPLIED);
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         if (!request.getCreatorDTO().getId().equals(currentUser.getId())) {
             throw new IllegalAccessError("The users don't match!");
@@ -89,7 +88,7 @@ public class JobApplicationService {
     }
 
     public JobApplication edit(JobApplicationDTO request) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         JobApplication jobApplication = jobApplicationRepository.findById(request.getId()).
                         orElseThrow(() -> new EntityNotFoundException("This Job Application does not exist"));
@@ -128,7 +127,7 @@ public class JobApplicationService {
     }
 
     public JobApplication changeStatus(Integer jobApplicationID, String status){
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationID).
                         orElseThrow(() -> new EntityNotFoundException("This Job Application does not exist"));
@@ -305,7 +304,7 @@ public class JobApplicationService {
     }
 
     public String withdrawJobApplicationById(Integer id) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         JobApplication jobApplication = jobApplicationRepository.findById(id).
                         orElseThrow(() -> new EntityNotFoundException("This Post does not exist"));
@@ -336,7 +335,7 @@ public class JobApplicationService {
 
 
     public List<JobApplicationDTO> getMyApplications() {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         return jobApplicationRepository.findByCreatorAndIsWithdrawnFalse(currentUser).stream().map(application -> jobApplicationMapper.toDTO(application)).toList();
 
@@ -348,7 +347,7 @@ public class JobApplicationService {
             throw new IllegalArgumentException("jobId field is null");
 
         Post job = postService.getPostById(jobId);
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
 
         if (!job.getCreator().getId().equals(currentUser.getId())) { 
             throw new AccessDeniedException("Only Job Post's creator can see the applications" );
@@ -360,7 +359,7 @@ public class JobApplicationService {
     } 
 
     public Page<JobApplication> getApplicationsToMyJobs(Pageable pageable) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         return jobApplicationRepository.findByPostCreatorIdAndIsWithdrawnFalse(currentUser.getId(), pageable);
     }
 
@@ -376,7 +375,7 @@ public class JobApplicationService {
         if (id == null) 
             throw new IllegalArgumentException("ID must not be null");
 
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         
         JobApplication jobApplication= jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Unable to find job application by id: " + id));

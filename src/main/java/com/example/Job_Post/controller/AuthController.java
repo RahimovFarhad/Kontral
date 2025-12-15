@@ -1,6 +1,7 @@
 package com.example.Job_Post.controller;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -39,43 +40,52 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         try {
-            String refreshToken = Arrays.stream(request.getCookies())
-                .filter(c -> "refreshToken".equals(c.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
-
-
-            String username = JwtService.extractUsername(refreshToken); // Extract username from the JWT
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username); // Load user details from the database
-
-            
-
-            if (refreshToken == null || !JwtService.isTokenValid(refreshToken, userDetails)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+            Cookie[] cookies = request.getCookies();
+            if (cookies == null) {
+                return ResponseEntity.status(401).body("No cookies present");
             }
 
-            User user = userService.getUserByEmail(username);
-            String newAccessToken = JwtService.generateToken(user, TokenType.ACCESS);
+            String refreshToken = Arrays.stream(cookies)
+                .filter(c -> "refreshToken".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
 
-            // optional: rotate refresh token
-            String newRefreshToken = JwtService.generateToken(user, TokenType.REFRESH);
-            Cookie cookie = new Cookie("refreshToken", newRefreshToken);
+            if (refreshToken == null) {
+                return ResponseEntity.status(401).body("Missing refresh token");
+            }
+
+            if (!JwtService.isTokenSignatureValid(refreshToken)) {
+                return ResponseEntity.status(401).body("Invalid signature");
+            }
+
+            if (JwtService.extractExpiration(refreshToken).before(new Date())) {
+                return ResponseEntity.status(401).body("Token expired");
+            }
+
+            if (!JwtService.isRefreshToken(refreshToken)) {
+                return ResponseEntity.status(401).body("Not a refresh token");
+            }
+
+            String email = JwtService.extractUsername(refreshToken);
+
+            // No DB lookup needed!
+
+            String newAccess = JwtService.generateTokenByEmail(email, TokenType.ACCESS);
+            String newRefresh = JwtService.generateTokenByEmail(email, TokenType.REFRESH);
+
+            Cookie cookie = new Cookie("refreshToken", newRefresh);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setSecure(false);
             cookie.setPath("/api/v1/auth");
             cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.addCookie(cookie);
+            response.setHeader("Set-Cookie", cookie.toString());
 
-            return ResponseEntity.ok(Map.of("token", newAccessToken));
-        }
-        catch (Exception e) {
-
-            return ResponseEntity.badRequest().body("Cannot refresh!");
-
-            
+            return ResponseEntity.ok(Map.of("token", newAccess));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Cannot refresh");
         }
     }
 
-    
 }

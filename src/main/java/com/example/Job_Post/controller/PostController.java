@@ -83,11 +83,11 @@ public class PostController {
         try {            
             Page<PostDTO> page = postService.getAllPosts(
                 search, category, minPrice, maxPrice, employmentType, sortBy, pageable
-            ).map(post -> postMapper.toDTO(post));
+            );
             
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-            
-            return ResponseEntity.ok(response);   
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Cannot get posts: " + e.getMessage());

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.PostDTO;
 import com.example.Job_Post.dto.PostMapper;
 import com.example.Job_Post.entity.Post;
@@ -21,6 +22,7 @@ import com.example.Job_Post.repository.SavedPostRepository;
 import com.example.Job_Post.specification.PostSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 
@@ -35,12 +37,13 @@ public class PostService {
     private final NotificationService notificationService;
 
     private final UserService userService;
+    private final CurrentUser cUser;
 
     public Post create(PostDTO post) {
         System.out.println("Received post data: " + post);
         Post newPost = postMapper.toEntity(post);
 
-        newPost.setCreator(userService.getCurrentUser());
+        newPost.setCreator(cUser.get());
         newPost.setCreatedAt(LocalDateTime.now());
 
          if (post.getSalary() != null){
@@ -53,7 +56,8 @@ public class PostService {
     }
 
     public Post edit(PostDTO request) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
+
 
         Post post = postRepository.findById(request.getId()).
                         orElseThrow(() -> new EntityNotFoundException("This Post does not exist"));
@@ -111,7 +115,8 @@ public class PostService {
     }
 
     public String deletePostById(Integer id) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
+
 
         Post post = postRepository.findById(id).
                         orElseThrow(() -> new EntityNotFoundException("This Post does not exist"));
@@ -128,11 +133,13 @@ public class PostService {
 
     } 
 
-    public Page<Post> getAllPosts(Pageable pageable) {
-        return postRepository.findAll(pageable);
+    @Transactional
+    public Page<PostDTO> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable).map(postMapper::toDTO);
     }
 
-    public Page<Post> getAllPosts(String search, String category, Integer minPrice, 
+    @Transactional
+    public Page<PostDTO> getAllPosts(String search, String category, Integer minPrice, 
                                   Integer maxPrice, String employmentType, String sortBy, Pageable pageable) {
         
         // Create combined specification
@@ -143,7 +150,7 @@ public class PostService {
             pageable = applyCustomSort(sortBy, pageable);
         }
         
-        return postRepository.findAll(spec, pageable);
+        return postRepository.findAll(spec, pageable).map(postMapper::toDTO);
     }
 
     private Pageable applyCustomSort(String sortBy, Pageable pageable) {
@@ -174,7 +181,7 @@ public class PostService {
     }
 
     public Page<Post> getMyPosts(Pageable pageable) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = cUser.get();
         return getPostsByCreatorId(currentUser.getId(), pageable);
     }
 

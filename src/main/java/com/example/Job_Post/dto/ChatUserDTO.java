@@ -1,19 +1,27 @@
 package com.example.Job_Post.dto;
 
-import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.Status;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@AllArgsConstructor
-public class ChatUserDTO extends UserDTO{
-    private Boolean hasUnseenMessageToCurrentUser;
+public class ChatUserDTO {
 
+    private Integer id;
+    private String nickName;
+    private String imageUrl;   // match entity field exactly
+    private String email;     // MUST be Status enum, NOT String
+    private Status status;     // MUST be Status enum, NOT String
 
+    private boolean hasUnseenMessageToCurrentUser;
 
+    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email) {
+        this.id = id;
+        this.nickName = (nickName != null) ? nickName : email;
+        this.imageUrl = imageUrl;
+        this.status = status;
+        this.email = email;
+    }
 }

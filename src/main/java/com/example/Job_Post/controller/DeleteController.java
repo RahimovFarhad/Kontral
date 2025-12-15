@@ -40,7 +40,7 @@ public class DeleteController {
         try {
             ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
                     .httpOnly(true)
-                    .secure(false) // localhost
+                    .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
                     .path("/api/v1/auth/refresh")
                     .maxAge(0)

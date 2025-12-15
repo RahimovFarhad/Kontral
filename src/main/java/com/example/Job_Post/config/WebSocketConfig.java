@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
     private final JwtHandshakeInterceptor.JwtChannelInterceptor jwtChannelInterceptor;
 
 
@@ -36,7 +38,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
-    .setAllowedOriginPatterns("http://localhost:5173") // Allow specific origin for CORS
+    .addInterceptors(jwtHandshakeInterceptor)
+    .setAllowedOriginPatterns("http://localhost:5173", "https://kontral-frontend-1.onrender.com") // Allow specific origin for CORS
     .withSockJS(); // Enable SockJS fallback options
   }
 

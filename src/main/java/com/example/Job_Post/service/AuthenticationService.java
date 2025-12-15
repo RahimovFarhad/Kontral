@@ -61,7 +61,7 @@ public class AuthenticationService {
             )
         );
 
-        if (!user.getVerified()){
+        if (user.getVerified() == null || !user.getVerified()){
             final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
             user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
             user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
@@ -82,7 +82,7 @@ public class AuthenticationService {
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false) // localhost
+                    .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
                     .path("/api/v1/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)

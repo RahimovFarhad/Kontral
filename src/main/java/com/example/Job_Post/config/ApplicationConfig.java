@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.Job_Post.entity.User;
+import com.example.Job_Post.record.AppUserPrincipal;
 import com.example.Job_Post.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,12 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        return username -> {
+            User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            return new AppUserPrincipal(user.getId(), user.getEmail(), user.getRole(), user.getPassword());
+        };
     }
 
     @Bean 

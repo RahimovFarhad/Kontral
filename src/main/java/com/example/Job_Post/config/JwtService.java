@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.User;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -22,6 +23,12 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
+
+    // do with .env later
+    static Dotenv dotenv = Dotenv.load();
+    private static final String SECRET_KEY = dotenv.get("SECRET_KEY");
+
+
 
     public static String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -33,23 +40,23 @@ public class JwtService {
     }
 
 
-private static Claims extractAllClaims(String token) {
-    // System.out.println("🪪 JWT before parsing: " + token);
-    if (token == null || token.trim().isEmpty()) {
-        throw new IllegalArgumentException("❌ JWT is null or empty before parsing.");
-    }
+    private static Claims extractAllClaims(String token) {
+        // System.out.println("🪪 JWT before parsing: " + token);
+        if (token == null || token.trim().isEmpty()) {
+            throw new IllegalArgumentException("❌ JWT is null or empty before parsing.");
+        }
 
-    return Jwts
-        .parser()
-        .verifyWith(getSignInKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
-}
+        return Jwts
+            .parser()
+            .verifyWith(getSignInKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+    }
 
 
     private static SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(System.getenv("SECRET_KEY"));
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes); 
     }
  
@@ -70,8 +77,11 @@ private static Claims extractAllClaims(String token) {
 
 
     public static String generateToken(User user, TokenType tokenType) {
-        return generateToken(new HashMap<>(), user, tokenType);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", tokenType.name().toLowerCase()); // "access" or "refresh"
+        return generateToken(claims, user, tokenType);
     }
+
 
     public static String generateToken(Map<String, Object> extraClaims, User user, TokenType tokenType) {
         int time = (tokenType.equals(TokenType.REFRESH)) ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 10;
@@ -85,17 +95,42 @@ private static Claims extractAllClaims(String token) {
             .claims(extraClaims)
             .compact();
     }
-    public static String generateTokenByEmail (String email, TokenType tokenType) {
-        int time = (tokenType.equals(TokenType.REFRESH)) ? 1000 * 60 * 60 * 24 * 7 : 1000 * 60 * 10;
+    public static String generateTokenByEmail(String email, TokenType tokenType) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", tokenType.name().toLowerCase());
+        
+        int time = (tokenType.equals(TokenType.REFRESH)) 
+            ? 1000 * 60 * 60 * 24 * 7 
+            : 1000 * 60 * 10;
 
-        return Jwts
-            .builder()
+        return Jwts.builder()
             .subject(email)
-            .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + time)) // 10 hours
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + time))
+            .claims(claims)
             .signWith(getSignInKey())
             .compact();
     }
+
+    public static boolean isRefreshToken(String token) {
+        try {
+            String type = extractClaim(token, c -> c.get("type", String.class));
+            return "refresh".equals(type);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isTokenSignatureValid(String token) {
+        try {
+            extractAllClaims(token); // will throw if invalid
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 
 
     

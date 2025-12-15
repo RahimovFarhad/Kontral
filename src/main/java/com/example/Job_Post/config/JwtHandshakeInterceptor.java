@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,31 +49,38 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor =
+            MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+
             String authHeader = accessor.getFirstNativeHeader("Authorization");
+
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 String username = JwtService.extractUsername(token);
+
                 if (username != null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
                     if (JwtService.isTokenValid(token, userDetails)) {
                         UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                            );
+                                userDetails, null, userDetails.getAuthorities());
+
+                        // 🔥 THIS IS CRUCIAL
                         accessor.setUser(authentication);
-                        // Avoid setting SecurityContextHolder here
-                        System.out.println("Authentication set for WebSocket user: " + username);
+                        accessor.setHeader("simpUser", authentication);
+
+                        System.out.println("WS Authenticated user: " + username);
                     }
                 }
             }
         }
+
         return message;
     }
+
 
         @Override
         public void postSend(Message<?> message, MessageChannel channel, boolean sent) {

@@ -17,7 +17,8 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    private static final String FRONTEND_URL = "http://localhost:5173";
+    // private static final String FRONTEND_URL = "http://localhost:5173";
+    private static final String FRONTEND_URL = "https://kontral-frontend-1.onrender.com";
     private static final String BACKEND_URL = "http://localhost:8080";
 
     public void sendVerificationEmail(String email, String verificationToken) {
