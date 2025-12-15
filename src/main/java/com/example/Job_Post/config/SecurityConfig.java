@@ -38,6 +38,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/v1/user/login",
                     "/api/v1/user/register",
@@ -84,10 +85,11 @@ public class SecurityConfig {
                     String redirectUrl = "https://kontral.onrender.com";
 
                     // Send JWT in JSON instead of redirect
-                    response.sendRedirect(redirectUrl);
                     response.setContentType("application/json");
                     response.setCharacterEncoding("UTF-8");
                     response.getWriter().flush();
+                    
+                    response.sendRedirect(redirectUrl);
 
                 })
                 .failureHandler((request, response, exception) -> {
