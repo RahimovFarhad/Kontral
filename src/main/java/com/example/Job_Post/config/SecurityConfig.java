@@ -89,16 +89,17 @@ public class SecurityConfig {
                     // response.setCharacterEncoding("UTF-8");
                     // response.getWriter().flush();
                     
-                    // response.sendRedirect(redirectUrl);
+                    System.out.println("Cookie" + response.getHeader("Set-Cookie"));
+                    response.sendRedirect(redirectUrl);
 
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().write("""
-                    {
-                    "redirectUrl": "%s"
-                    }
-                    """.formatted(redirectUrl));
-                    response.getWriter().flush();
+                    // response.setContentType("application/json");
+                    // response.setCharacterEncoding("UTF-8");
+                    // response.getWriter().write("""
+                    // {
+                    // "redirectUrl": "%s"
+                    // }
+                    // """.formatted(redirectUrl));
+                    // response.getWriter().flush();
 
                 })
                 .failureHandler((request, response, exception) -> {
