@@ -72,10 +72,6 @@ public class AuthenticationService {
 
             throw new AccessDeniedException("This account is not verified!");
         }
-
-
-
-
       
         String refreshToken = JwtService.generateToken(user, TokenType.REFRESH);
         // String accessToken = JwtService.generateToken(user, TokenType.ACCESS);

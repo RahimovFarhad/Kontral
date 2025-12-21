@@ -5,6 +5,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -163,7 +164,7 @@ public class UserController {
     } 
     
 
-    @PostMapping("/authenticate")
+    @PostMapping(value = "/authenticate", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void authenticate(
             @RequestBody AuthenticationRequest request,
             HttpServletResponse response
