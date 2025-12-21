@@ -42,7 +42,7 @@ public class DeleteController {
                     .httpOnly(true)
                     .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
-                    .path("/api/v1/auth/refresh")
+                    .path("/")
                     .maxAge(0)
                     .build();
 

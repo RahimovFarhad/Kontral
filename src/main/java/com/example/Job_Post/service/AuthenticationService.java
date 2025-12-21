@@ -84,7 +84,7 @@ public class AuthenticationService {
                     .httpOnly(true)
                     .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
-                    .path("/api/v1/auth/refresh")
+                    .path("/")
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
 
