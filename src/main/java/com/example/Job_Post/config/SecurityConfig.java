@@ -85,9 +85,9 @@ public class SecurityConfig {
                     String redirectUrl = "https://kontral.onrender.com";
 
                     // Send JWT in JSON instead of redirect
-                    response.setContentType("application/json");
-                    response.setCharacterEncoding("UTF-8");
-                    response.getWriter().flush();
+                    // response.setContentType("application/json");
+                    // response.setCharacterEncoding("UTF-8");
+                    // response.getWriter().flush();
                     
                     response.sendRedirect(redirectUrl);
 
