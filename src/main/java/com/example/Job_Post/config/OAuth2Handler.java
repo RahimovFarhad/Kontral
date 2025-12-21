@@ -2,6 +2,7 @@ package com.example.Job_Post.config;
 
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -46,13 +47,15 @@ public class OAuth2Handler {
 
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(true) // localhost
+                    .secure(true) 
                     .sameSite("None") // required for cross-origin
                     .path("/")
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
             
-            response.setHeader("Set-Cookie", cookie.toString());
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            
+
             
 
             return;

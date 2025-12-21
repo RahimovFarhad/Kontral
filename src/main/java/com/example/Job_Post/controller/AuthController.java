@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,7 +70,9 @@ public class AuthController {
             cookie.setSecure(false);
             cookie.setPath("/");
             cookie.setMaxAge(7 * 24 * 60 * 60);
-            response.setHeader("Set-Cookie", cookie.toString());
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
 
             return ResponseEntity.ok(Map.of("token", newAccess));
         } catch (Exception e) {

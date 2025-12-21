@@ -2,6 +2,7 @@ package com.example.Job_Post.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -194,9 +195,9 @@ public class RegisterService {
             final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
             user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
             user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
-            user.setVerified(true); // temporary because free render does not support email sending
-
+            user.setVerified(true); // temporary because email sending is disabled
             savedUser = userRepository.save(user);
+
         }
         else{
             user.setVerified(true);
@@ -219,11 +220,11 @@ public class RegisterService {
                     .httpOnly(true)
                     .secure(true) // localhost
                     .sameSite("None") // required for cross-origin
-                    .path("/")
+                    .path("/api/v1/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
 
-        response.setHeader("Set-Cookie", cookie.toString());
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
 
 

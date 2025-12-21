@@ -163,19 +163,22 @@ public class UserController {
     } 
     
 
-    @SuppressWarnings("unchecked")
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
+    public void authenticate(
+            @RequestBody AuthenticationRequest request,
+            HttpServletResponse response
+    ) {
         try {
-            @SuppressWarnings("rawtypes")
-            ResponseEntity res = ResponseEntity.ok(authenticationService.authenticate(request, response));
-            
-            return res;
+            authenticationService.authenticate(request, response);
+
+            // IMPORTANT: redirect, do NOT return JSON
+            response.sendRedirect("https://kontral.onrender.com");
+
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
-        }                         
+            throw new RuntimeException(e);
+        }
     }
+
 
     @SuppressWarnings("unchecked")
     @PostMapping("/uploadImage/{entity}/{entityId}/{field}")

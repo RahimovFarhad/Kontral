@@ -43,7 +43,7 @@ public class AuthenticationService {
 
 
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) throws AccessDeniedException {
+    public void authenticate(AuthenticationRequest request, HttpServletResponse response) throws AccessDeniedException {
         request.setEmail(request.getEmail().toLowerCase());
         
         User user = userRepository.findByEmail(request.getEmail())
@@ -78,7 +78,7 @@ public class AuthenticationService {
 
       
         String refreshToken = JwtService.generateToken(user, TokenType.REFRESH);
-        String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
+        // String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
@@ -90,13 +90,13 @@ public class AuthenticationService {
 
         response.setHeader("Set-Cookie", cookie.toString());
 
+        return;
 
 
-        return AuthenticationResponse.builder()
-                                     .token(accessToken)
-                                     .build(); 
+        // return AuthenticationResponse.builder()
+        //                              .token(accessToken)
+        //                              .build(); 
     }
-
 
     public String deleteUser(String email, @RequestBody DeleteRequest request) {
         // Optional: re-authenticate with password if needed for extra safety

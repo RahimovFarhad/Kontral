@@ -2,6 +2,7 @@ package com.example.Job_Post.controller;
 
 import java.security.Principal;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,7 +47,9 @@ public class DeleteController {
                     .maxAge(0)
                     .build();
 
-            response.setHeader("Set-Cookie", cookie.toString());
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+
 
                 
             ResponseEntity<String> res = ResponseEntity.ok("Logged out successfully!");
