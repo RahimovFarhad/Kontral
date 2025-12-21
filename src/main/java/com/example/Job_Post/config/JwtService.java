@@ -84,7 +84,8 @@ public class JwtService {
     public static String generateToken(Map<String, Object> extraClaims, User user, TokenType tokenType) {
         int time = (tokenType.equals(TokenType.REFRESH))
                 ? 1000 * 60 * 60 * 24 * 7
-                : 1000 * 60 * 10;
+                // : 1000 * 60 * 10;
+                : 1000 * 10;
 
         return Jwts
             .builder()
