@@ -28,7 +28,6 @@ public class SalaryNegotiationService {
     private final SalaryNegotiationRepository salaryNegotiationRepository;
     private final SalaryOfferRepository salaryOfferRepository;
     private final SalaryNegotiationMapper salaryNegotiationMapper;
-    private final UserService userService;
     private final JobApplicationRepository jobApplicationRepository;
     private final CurrentUser cUser;
 

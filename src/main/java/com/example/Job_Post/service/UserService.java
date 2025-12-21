@@ -4,7 +4,6 @@ package com.example.Job_Post.service;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 

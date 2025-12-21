@@ -28,9 +28,7 @@ import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.ResetToken;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.AuthMethod;
-import com.example.Job_Post.repository.ResetTokenRepository;
 import com.example.Job_Post.service.AuthenticationService;
-import com.example.Job_Post.service.EmailService;
 import com.example.Job_Post.service.FileUploadService;
 import com.example.Job_Post.service.RegisterService;
 import com.example.Job_Post.service.UserService;
@@ -55,11 +53,6 @@ public class UserController {
 
     private final FileUploadService fileUploadService;
 
-    private final EmailService emailService;
-    private final ResetTokenRepository resetTokenRepository;
-
-
-
     @SuppressWarnings("unchecked")
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
@@ -76,30 +69,31 @@ public class UserController {
         
     }
 
-    @GetMapping("/register/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token, @RequestParam("email") String email) {
+    // this endpoint is disabled for now: Free render deploy does not support email sending
+    // @GetMapping("/register/verify")
+    // public ResponseEntity<?> verifyEmail(@RequestParam("token") String token, @RequestParam("email") String email) {
 
-        User user = userService.getUserByEmail(email);
+    //     User user = userService.getUserByEmail(email);
 
-        if (user == null){
-            return ResponseEntity.badRequest().body("Invalid verification link.");
-        }
+    //     if (user == null){
+    //         return ResponseEntity.badRequest().body("Invalid verification link.");
+    //     }
 
-        String storedHashedToken = user.getVerificationTokenHash();
-        LocalDateTime expiry = user.getVerificationTokenExpiry();
+    //     String storedHashedToken = user.getVerificationTokenHash();
+    //     LocalDateTime expiry = user.getVerificationTokenExpiry();
 
-        if (expiry == null || LocalDateTime.now().isAfter(expiry)) {
-            return ResponseEntity.badRequest().body("Verification link expired.");
-        }
+    //     if (expiry == null || LocalDateTime.now().isAfter(expiry)) {
+    //         return ResponseEntity.badRequest().body("Verification link expired.");
+    //     }
 
-        if (!passwordEncoder.matches(token, storedHashedToken)) {
-            return ResponseEntity.badRequest().body("Invalid verification token.");
-        }
+    //     if (!passwordEncoder.matches(token, storedHashedToken)) {
+    //         return ResponseEntity.badRequest().body("Invalid verification token.");
+    //     }
 
-        registerService.saveVerifiedUser(user);
+    //     registerService.saveVerifiedUser(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Email successfully verified!");
-    } 
+    //     return ResponseEntity.status(HttpStatus.CREATED).body("Email successfully verified!");
+    // } 
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam("email") String email){

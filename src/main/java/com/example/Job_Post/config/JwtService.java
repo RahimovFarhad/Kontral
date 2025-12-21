@@ -130,4 +130,11 @@ public class JwtService {
             return false;
         }
     }
+
+    public static boolean isRefreshTokenValid(String token) {
+        return isTokenSignatureValid(token)
+            && isRefreshToken(token)
+            && !isTokenExpired(token);
+    }
+
 }

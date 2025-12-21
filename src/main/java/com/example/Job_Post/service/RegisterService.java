@@ -45,6 +45,90 @@ public class RegisterService {
     //I should create a delete method to delete user details
     //I should simplify the register method's [updateToCustom] by using edit method which is yet to be created
 
+    // This method is disabled for now: Free render deploy does not support email sending
+    // public User register(RegisterRequest request, AuthMethod authMethod) throws IllegalArgumentException {
+    //     User user = null;
+    //     Boolean updatesToCustom = false;
+
+    //     if (request == null) {
+    //         throw new IllegalArgumentException("Request cannot be null");
+    //     }
+    //     if (authMethod == AuthMethod.Custom && (request.getPassword() == null || request.getPassword().isEmpty())) {
+    //         throw new IllegalArgumentException("Password is required for custom registration");
+    //     }
+
+    //     request.setEmail(request.getEmail().toLowerCase()); // set all emails to lowercase
+    //     Boolean existsByEmail = userRepository.existsByEmail(request.getEmail() != null ? request.getEmail() : "");
+
+        
+    //     if (existsByEmail) {
+    //         user = userRepository.findByEmail(request.getEmail())
+    //         .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
+
+    //         // If the email exists and the auth method is Custom, we throw an error
+    //         if (user.getAuthMethod().equals(AuthMethod.Custom) && authMethod.equals(AuthMethod.Custom)) {
+    //             if (user.getVerified())
+    //                 throw new IllegalArgumentException("Email already exists");
+    //             else if(user.getVerificationTokenHash() != null && !LocalDateTime.now().isAfter(user.getVerificationTokenExpiry())){
+    //                 throw new IllegalArgumentException("A Verification Link Already Sent");
+    //             }
+    //         }
+    //         // If the email exists but the auth method is OAuth2, we can proceed without throwing an error
+    //         if (authMethod.equals(AuthMethod.Custom)) {
+    //             updatesToCustom = true;
+    //         }
+
+    //         user.setAuthMethod(AuthMethod.Custom);
+    //         user.setPassword(passwordEncoder.encode(request.getPassword()));
+    //         user.setNickName(null);
+    //         user.setPhoneNumber(request.getPhoneNumber());  
+    //         user.setUpdated_at(LocalDateTime.now()); // Assuming you have an updated_at field in User
+    //     }
+
+    //     Boolean existsByPhoneNumber = userRepository.existsByPhoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "");
+        
+    //     if (!updatesToCustom && existsByPhoneNumber) {
+    //         throw new IllegalArgumentException("Phone number already exists");
+    //     }
+    //     else if (!updatesToCustom && !existsByEmail && !existsByPhoneNumber) {
+    //         user = User.builder()
+    //                             .nickName(null) // Nickname can be set later")
+    //                             .updated_at(LocalDateTime.now()) // Assuming you have an updated_at field in User
+    //                             .phoneNumber(request.getPhoneNumber())
+    //                             .email(request.getEmail())
+    //                             .role(Role.USER) // Assuming Role is an enum with USER as one of the values
+    //                             .authMethod(authMethod) // Assuming authMethod is a field in User
+    //                             .password((authMethod.equals(AuthMethod.Custom) ?  passwordEncoder.encode(request.getPassword()) : null)) // Encode password only if authMethod is Custom
+    //                             .build();
+            
+    //     }
+
+    //     user.setStatus(Status.OFFLINE);
+
+    //     User savedUser = null;
+
+    //     if (user.getAuthMethod() == AuthMethod.Custom){
+    //         final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
+    //         user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
+    //         user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
+    //         user.setVerified(false);
+
+    //         savedUser = userRepository.save(user);
+
+    //         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
+
+    //     }
+    //     else{
+    //         user.setVerified(true);
+    //         savedUser = userRepository.save(user);
+    //     }
+
+    //     return savedUser;
+                                      
+
+    // }
+
+
     public User register(RegisterRequest request, AuthMethod authMethod) throws IllegalArgumentException {
         User user = null;
         Boolean updatesToCustom = false;
@@ -110,12 +194,9 @@ public class RegisterService {
             final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
             user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
             user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
-            user.setVerified(false);
+            user.setVerified(true); // temporary because free render does not support email sending
 
             savedUser = userRepository.save(user);
-
-            emailService.sendVerificationEmail(user.getEmail(), verificationToken);
-
         }
         else{
             user.setVerified(true);

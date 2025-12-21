@@ -36,7 +36,6 @@ public class PostService {
 
     private final NotificationService notificationService;
 
-    private final UserService userService;
     private final CurrentUser cUser;
 
     public Post create(PostDTO post) {

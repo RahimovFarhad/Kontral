@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Job_Post.dto.PagedResponse;
 import com.example.Job_Post.dto.ReviewDTO;
-import com.example.Job_Post.entity.Review;
 import com.example.Job_Post.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
