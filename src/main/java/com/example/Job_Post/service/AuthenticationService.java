@@ -43,12 +43,11 @@ public class AuthenticationService {
 
 
 
-    public void authenticate(AuthenticationRequest request, HttpServletResponse response) throws AccessDeniedException {
-        request.setEmail(request.getEmail().toLowerCase());
-        
-        User user = userRepository.findByEmail(request.getEmail())
-        .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
+    public void authenticate(String email, String password, HttpServletResponse response) throws AccessDeniedException {
+        String normalizedEmail = email.toLowerCase();
 
+        User user = userRepository.findByEmail(normalizedEmail)
+        .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + normalizedEmail));
         if (!user.getAuthMethod().equals(AuthMethod.Custom)) {
             throw new IllegalArgumentException("Try logging in with " + user.getAuthMethod() + " method");
         }
@@ -56,8 +55,8 @@ public class AuthenticationService {
  
         authenticationManager.authenticate (
             new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
+                normalizedEmail,
+                password
             )
         );
 
@@ -95,16 +94,17 @@ public class AuthenticationService {
     }
 
     public String deleteUser(String email, @RequestBody DeleteRequest request) {
+        String normalizedEmail = email.toLowerCase();
         // Optional: re-authenticate with password if needed for extra safety
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                email,
+                normalizedEmail,
                 request.getPassword()
             )
         );
 
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        User user = userRepository.findByEmail(normalizedEmail)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + normalizedEmail));
 
         userRepository.delete(user);
         return "User deleted successfully";

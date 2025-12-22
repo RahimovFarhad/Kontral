@@ -164,13 +164,14 @@ public class UserController {
     } 
     
 
-    @PostMapping(value = "/authenticate", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/authenticate")
     public void authenticate(
-            @RequestBody AuthenticationRequest request,
+            @RequestParam String email,
+            @RequestParam String password,
             HttpServletResponse response
     ) {
         try {
-            authenticationService.authenticate(request, response);
+            authenticationService.authenticate(email, password, response);
 
             // IMPORTANT: redirect, do NOT return JSON
             response.sendRedirect("https://kontral.onrender.com");

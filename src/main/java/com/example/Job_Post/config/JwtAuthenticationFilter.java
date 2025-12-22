@@ -122,7 +122,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("Error during authentication: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Unauthorized: " + e.getMessage());
-            filterChain.doFilter(request, response);
+            // filterChain.doFilter(request, response);
             return;
         }
     
