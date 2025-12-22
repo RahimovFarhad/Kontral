@@ -2,6 +2,7 @@ package com.example.Job_Post.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -27,6 +28,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
     private final JwtHandshakeInterceptor.JwtChannelInterceptor jwtChannelInterceptor;
 
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -39,7 +42,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
     .addInterceptors(jwtHandshakeInterceptor)
-    .setAllowedOriginPatterns("http://localhost:5173", "https://kontral.onrender.com") // Allow specific origin for CORS
+    .setAllowedOriginPatterns("http://localhost:5173", frontendUrl) // Allow specific origin for CORS
     .withSockJS(); // Enable SockJS fallback options
   }
 

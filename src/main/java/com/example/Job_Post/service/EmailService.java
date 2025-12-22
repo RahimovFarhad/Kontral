@@ -18,8 +18,13 @@ public class EmailService {
     private String from;
 
     // private static final String FRONTEND_URL = "http://localhost:5173";
-    private static final String FRONTEND_URL = "https://kontral.onrender.com";
-    private static final String BACKEND_URL = "https://kontral-backend.onrender.com";
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
+
+    @Value("${BACKEND_URL}")
+    private String backendUrl;
+
+    
 
     public void sendVerificationEmail(String email, String verificationToken) {
         String subject = "Email Verification";
@@ -27,7 +32,7 @@ public class EmailService {
         String message = "Click the button below to verify your email address:";
 
         System.out.println("\nHere\n");
-        sendEmail(email, verificationToken, subject, path, message, BACKEND_URL);
+        sendEmail(email, verificationToken, subject, path, message, backendUrl);
     }
 
 
@@ -35,7 +40,7 @@ public class EmailService {
         String subject = "Password Reset Request";
         String path = "/reset-password";
         String message = "Click the button below to reset your password:";
-        sendEmail(email, resetToken, subject, path, message, FRONTEND_URL);
+        sendEmail(email, resetToken, subject, path, message, frontendUrl);
     }
 
 

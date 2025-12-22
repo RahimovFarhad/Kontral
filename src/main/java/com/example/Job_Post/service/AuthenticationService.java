@@ -43,11 +43,12 @@ public class AuthenticationService {
 
 
 
-    public void authenticate(String email, String password, HttpServletResponse response) throws AccessDeniedException {
-        String normalizedEmail = email.toLowerCase();
+    public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) throws AccessDeniedException {
+        request.setEmail(request.getEmail().toLowerCase());
+        
+        User user = userRepository.findByEmail(request.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
 
-        User user = userRepository.findByEmail(normalizedEmail)
-        .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + normalizedEmail));
         if (!user.getAuthMethod().equals(AuthMethod.Custom)) {
             throw new IllegalArgumentException("Try logging in with " + user.getAuthMethod() + " method");
         }
@@ -55,8 +56,8 @@ public class AuthenticationService {
  
         authenticationManager.authenticate (
             new UsernamePasswordAuthenticationToken(
-                normalizedEmail,
-                password
+                request.getEmail(),
+                request.getPassword()
             )
         );
 
@@ -71,9 +72,9 @@ public class AuthenticationService {
 
             throw new AccessDeniedException("This account is not verified!");
         }
-      
+        
         String refreshToken = JwtService.generateToken(user, TokenType.REFRESH);
-        // String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
+        String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
@@ -85,12 +86,11 @@ public class AuthenticationService {
 
         response.setHeader("Set-Cookie", cookie.toString());
 
-        return;
 
 
-        // return AuthenticationResponse.builder()
-        //                              .token(accessToken)
-        //                              .build(); 
+        return AuthenticationResponse.builder()
+                                     .token(accessToken)
+                                     .build(); 
     }
 
     public String deleteUser(String email, @RequestBody DeleteRequest request) {

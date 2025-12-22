@@ -2,6 +2,7 @@ package com.example.Job_Post.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,6 +32,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final  AuthenticationProvider authenticationProvider;
     private final OAuth2Handler oAuth2Handler;
+
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
@@ -82,15 +86,13 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     oAuth2Handler.generateJwtForOAuth2User(authentication, response);
                     // String redirectUrl = "http://localhost:5173/";
-                    String redirectUrl = "https://kontral.onrender.com";
-
                     // Send JWT in JSON instead of redirect
                     // response.setContentType("application/json");
                     // response.setCharacterEncoding("UTF-8");
                     // response.getWriter().flush();
                     
                     System.out.println("Cookie" + response.getHeader("Set-Cookie"));
-                    response.sendRedirect(redirectUrl);
+                    response.sendRedirect(frontendUrl);
 
                     // response.setContentType("application/json");
                     // response.setCharacterEncoding("UTF-8");
@@ -115,7 +117,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://kontral.onrender.com"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", frontendUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));

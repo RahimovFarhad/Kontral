@@ -4,6 +4,7 @@ package com.example.Job_Post.controller;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,9 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     private final FileUploadService fileUploadService;
+
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
 
     @SuppressWarnings("unchecked")
     @PostMapping("/register")
@@ -164,21 +168,18 @@ public class UserController {
     } 
     
 
-    @PostMapping(value = "/authenticate")
-    public void authenticate(
-            @RequestParam String email,
-            @RequestParam String password,
-            HttpServletResponse response
-    ) {
+    @SuppressWarnings("unchecked")
+    @PostMapping("/authenticate")
+    public ResponseEntity<String> authenticate(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         try {
-            authenticationService.authenticate(email, password, response);
-
-            // IMPORTANT: redirect, do NOT return JSON
-            response.sendRedirect("https://kontral.onrender.com");
-
+            @SuppressWarnings("rawtypes")
+            ResponseEntity res = ResponseEntity.ok(authenticationService.authenticate(request, response));
+            
+            return res;
         } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
+        }                         
     }
 
 
