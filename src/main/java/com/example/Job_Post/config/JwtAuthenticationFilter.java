@@ -48,16 +48,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/v1/user/forgot-password") ||
                 path.equals("/api/v1/user/reset-password") ||
                 path.equals("/api/v1/user/validate-reset-token") ||
-                // path.startsWith("/js/") || 
-                // path.startsWith("/css/") || 
-                // path.startsWith("/images/") || 
-                // path.startsWith("/ws/") ||
-                // path.startsWith("/oauth2") ||
-                // path.equals("/") ||
-                // path.equals("/index.html") ||
-                // path.equals("/favicon.ico") ||
-                // path.startsWith("/assets/") ||
-                // path.equals("/vite.svg")
+                path.startsWith("/js/") || 
+                path.startsWith("/css/") || 
+                path.startsWith("/images/") || 
+                path.startsWith("/ws/") ||
+                path.startsWith("/oauth2") ||
+                path.equals("/") ||
+                path.equals("/index.html") ||
+                path.equals("/favicon.ico") ||
+                path.startsWith("/assets/") ||
+                path.equals("/vite.svg")
                 !path.startsWith("/api/")
                 ) {
                 filterChain.doFilter(request, response);
