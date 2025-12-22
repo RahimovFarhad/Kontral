@@ -53,7 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/images/") || 
                 path.startsWith("/ws/") ||
                 path.startsWith("/oauth2") ||
-                path.equals("/index.html") 
+                path.equals("/") ||
+                path.equals("/index.html") ||
+                path.equals("/favicon.ico") ||
+                path.startsWith("/assets/") ||
+                path.equals("/vite.svg")
                 ) {
                 filterChain.doFilter(request, response);
                 return;

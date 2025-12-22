@@ -44,6 +44,13 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/assets/**",
+                    "/vite.svg",
+                    "/favicon.ico"
+                ).permitAll()
+                .requestMatchers(
                     "/api/v1/user/login",
                     "/api/v1/user/register",
                     "/api/v1/user/authenticate",
@@ -132,11 +139,11 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(
+            "/",
             "/index.html",
             "/favicon.ico",
-            "/css/**",
-            "/js/**",
-            "/img/**"
+            "/assets/**",
+            "/vite.svg"
         );
     }
 
