@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/index.html") ||
                 path.equals("/favicon.ico") ||
                 path.startsWith("/assets/") ||
-                path.equals("/vite.svg")
+                path.equals("/vite.svg") ||
                 !path.startsWith("/api/")
                 ) {
                 filterChain.doFilter(request, response);
