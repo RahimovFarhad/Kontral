@@ -51,6 +51,20 @@ public class SecurityConfig {
                     "/favicon.ico"
                 ).permitAll()
                 .requestMatchers(
+                    // 🔑 SPA ROUTES
+                    "/home",
+                    "/browse/**",
+                    "/signup",
+                    "/post",
+                    "/profile/**",
+                    "/chat/**",
+                    "/notifications",
+                    "/jobs/**",
+                    "/mygigs/**",
+                    "/forgot-password",
+                    "/reset-password"
+                ).permitAll()
+                .requestMatchers(
                     "/api/v1/user/login",
                     "/api/v1/user/register",
                     "/api/v1/user/authenticate",
