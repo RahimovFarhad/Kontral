@@ -83,6 +83,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}").permitAll()
+                .requestMatchers("/health/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

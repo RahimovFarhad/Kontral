@@ -115,7 +115,6 @@ public class ChatController {
 
     @GetMapping("/messages/{senderId}/{recipientId}")
     public ResponseEntity<?> getChatMessages(@PathVariable Integer senderId, @PathVariable Integer recipientId, Principal principal) {
-
         try {
             User sender = userService.getUserById(senderId);
             User recipient = userService.getUserById(recipientId);
