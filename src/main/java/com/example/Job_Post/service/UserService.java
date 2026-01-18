@@ -11,9 +11,11 @@ import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.ChatUserDTO;
 import com.example.Job_Post.dto.UserDTO;
 import com.example.Job_Post.dto.UserMapper;
+import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
+import com.example.Job_Post.repository.ChatRoomRepository;
 import com.example.Job_Post.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class UserService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final CurrentUser cUser;
+    private final ChatRoomRepository chatRoomRepository;
 
     public User connectUser(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -138,6 +141,39 @@ public class UserService {
         }
 
         return users;
+    }
+
+    public Object getMyChatUsers() {
+        User currentUser = cUser.get();
+
+        Set<Integer> sendersWithUnread =
+            chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
+
+        List<ChatUserDTO> users = chatRoomRepository.findByUser1_IdOrUser2_IdOrderByLastMessageAtDesc(currentUser.getId(), currentUser.getId())
+                .stream()
+                .map( (ChatRoom chatRoom) -> {
+                    User otherUser = chatRoom.getUser1().getId().equals(currentUser.getId())
+                            ? chatRoom.getUser2()
+                            : chatRoom.getUser1();
+                    
+                    return userMapper.toChatDTO(otherUser, false);
+                })
+                .toList();
+        
+        for (ChatUserDTO u : users) {
+            if (sendersWithUnread.size() == 0) {
+                break;
+            }
+
+            if (sendersWithUnread.contains(u.getId())) {
+                u.setHasUnseenMessageToCurrentUser(true);
+                sendersWithUnread.remove(u.getId());
+            }
+            
+        }
+
+        return users;
+        
     }
 
     

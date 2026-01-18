@@ -3,11 +3,13 @@ package com.example.Job_Post.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +25,12 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.SEQUENCE )
     private Integer id;
 
-    private String chatRoomId;
+    // private String chatRoomId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chat_room_id", nullable = false)
+    private ChatRoom chatRoom;
+
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = true)
@@ -44,4 +51,11 @@ public class ChatMessage {
     private Boolean isSystemGenerated = false;
 
     
+
+    @PrePersist
+    public void onSend() {
+        if (timestamp == null) timestamp = LocalDateTime.now();
+        chatRoom.setLastMessageAt(timestamp);
+    }
+
 }

@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.ChatRoom;
+import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.ChatRoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final UserService userService;
 
     public ChatRoom getChatRoomByChatId(String chatId) {
         if (chatId == null || chatId.isEmpty()) {
@@ -24,24 +26,27 @@ public class ChatRoomService {
             .orElseThrow(() -> new IllegalStateException("Chat room not found for chat ID: " + chatId));
     }
 
-    public Optional<String> getChatId(Integer senderId, Integer recipientId, boolean createNewRoomIfNotExists) {
+    public Optional<ChatRoom> getChatRoom(Integer senderId, Integer recipientId, boolean createNewRoomIfNotExists) {
         if (senderId == null || recipientId == null) {
             throw new IllegalArgumentException("Sender ID and Recipient ID must not be null");
         }
 
-        return chatRoomRepository.findBySenderIdAndRecipientId(senderId, recipientId)
-            .map(ChatRoom::getChatId)
+        return chatRoomRepository.findByChatId(generateChatId(senderId, recipientId))
             .or(() -> {
                 if (createNewRoomIfNotExists) {
-                    var chatId = createChatId(senderId, recipientId);
-                    return Optional.of(chatId);
+                    return Optional.of(createChatRoom(senderId, recipientId));
                 }
                 return Optional.empty();
-
             });
     }
 
-    private String createChatId(Integer senderId, Integer recipientId) {
+    private String generateChatId(Integer senderId, Integer recipientId) {
+        Integer id1 = Math.max(senderId, recipientId);
+        Integer id2 = Math.min(senderId, recipientId);
+        return id1 + "_" + id2;
+    }
+
+    private ChatRoom createChatRoom(Integer senderId, Integer recipientId) {
         if (senderId == null || recipientId == null) {
             throw new IllegalArgumentException("Sender ID and Recipient ID must not be null");
         }
@@ -50,27 +55,20 @@ public class ChatRoomService {
             throw new IllegalArgumentException("Sender ID and Recipient ID must be different");
         }
 
+        User user1 = userService.getUserById(recipientId);
+        User user2 = userService.getUserById(senderId);
 
-        // make chatid starting with bigger one _ small one
-
-        String chatId = (senderId > recipientId) ? senderId + "_" + recipientId : recipientId + "_" + senderId;
+        String chatId = generateChatId(senderId, recipientId);
 
         ChatRoom senderRecipient = ChatRoom.builder()
-            .senderId(senderId)
-            .recipientId(recipientId)
-            .chatId(chatId) // Example chat ID generation
+            .user1(user1)
+            .user2(user2)
+            .chatId(chatId) 
             .build();
 
-        ChatRoom recipientSender = ChatRoom.builder()
-            .senderId(recipientId)
-            .recipientId(senderId)
-            .chatId(chatId) // Example chat ID generation
-            .build();
-
-        chatRoomRepository.save(senderRecipient);
-        chatRoomRepository.save(recipientSender);
-
-        return chatId;
+        return chatRoomRepository.save(senderRecipient);
     }
+
+    
     
 }

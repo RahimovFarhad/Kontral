@@ -1,9 +1,14 @@
 package com.example.Job_Post.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +26,15 @@ public class ChatRoom {
 
     private String chatId;
 
-    private Integer senderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user1_id", nullable = true)
+    private User user1;
 
-    private Integer recipientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user2_id", nullable = true)
+    private User user2;
+
+
+    private LocalDateTime createdAt;
+    private LocalDateTime lastMessageAt;
 }

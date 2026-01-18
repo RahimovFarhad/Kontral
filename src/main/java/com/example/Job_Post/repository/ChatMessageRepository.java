@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.Job_Post.entity.ChatMessage;
+import com.example.Job_Post.entity.ChatRoom;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Integer> {
     
@@ -29,6 +30,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
         WHERE cm.id = :id
     """)
     ChatMessage getChatMessageByIdLightweight(Integer id);
+
+    List<ChatMessage> findByChatRoom(ChatRoom chatRoom);
 
 
     

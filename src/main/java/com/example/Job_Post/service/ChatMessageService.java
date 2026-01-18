@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.ChatMessage;
+import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.repository.ChatMessageRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,17 +19,19 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomService chatRoomService;
 
+    @Transactional
     public ChatMessage saveMessage(ChatMessage chatMessage) {
         if (chatMessage.getSender() == null || chatMessage.getRecipient() == null || chatMessage.getContent() == null || chatMessage.getContent().isEmpty()) {
             throw new IllegalArgumentException("Sender, Recipient, and content must not be null or empty");
         }
 
-        String chatId = chatRoomService.getChatId(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), true)
+        ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), true)
             .orElseThrow(() -> new IllegalStateException("Chat room could not be created"));
 
-        chatMessage.setChatRoomId(chatId);
+        chatMessage.setChatRoom(chatRoom);
         chatMessage.setTimestamp(LocalDateTime.now());
         chatMessage.setIsRead(false); // Default to unread
+
 
         return chatMessageRepository.save(chatMessage);
     }
@@ -37,13 +41,13 @@ public class ChatMessageService {
             throw new IllegalArgumentException("Sender ID and Recipient ID must not be null");
         }
 
-        String chatId = chatRoomService.getChatId(senderID, recipientID, false)
+        ChatRoom chatRoom = chatRoomService.getChatRoom(senderID, recipientID, false)
             .orElseThrow(() -> new IllegalStateException("Chat room not found"));
 
-        if (chatId == null || chatId==""){
+        if (chatRoom == null) {
             throw new IllegalArgumentException("Chat room not found");
         }
-        return chatMessageRepository.findByChatRoomId(chatId);
+        return chatMessageRepository.findByChatRoom(chatRoom);
     }
 
     public ChatMessage getChatMessageById(Integer id) {

@@ -16,7 +16,7 @@ public class ChatMessageMapper {
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setRecipientId(chatMessage.getRecipient().getId());
         dto.setContent(chatMessage.getContent());
-        dto.setChatRoomId(chatMessage.getChatRoomId());
+        dto.setChatRoomId(chatMessage.getChatRoom().getChatId());
         dto.setSenderId(chatMessage.getSender().getId()); 
         dto.setIsRead(chatMessage.getIsRead());
         dto.setId(chatMessage.getId());
