@@ -25,9 +25,11 @@ public class PostDTO {
     private String category;
 
     private Double salary; // e.g., "50,000"
-    private Double salaryMin;
-    private Double salaryMax;
+    // private Double salaryMin;
+    // private Double salaryMax;
     private String salaryRange;
+    private Double salaryRangeLower;
+    private Double salaryRangeUpper;
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isSalaryNegotiable; // e.g., true if salary is negotiable

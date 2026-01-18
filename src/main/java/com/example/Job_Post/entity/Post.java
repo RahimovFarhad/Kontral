@@ -60,8 +60,8 @@ public class Post {
     private String jobCategory; // e.g., "Software Development", "Marketing"
 
     private Double salary; // e.g., "50,00"
-    private Double salaryMin;
-    private Double salaryMax;
+    private Double salaryRangeLower;
+    private Double salaryRangeUpper;
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isSalaryNegotiable; // e.g., true if salary is negotiable

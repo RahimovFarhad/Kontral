@@ -36,5 +36,7 @@ public class ChatRoom {
 
 
     private LocalDateTime createdAt;
-    private LocalDateTime lastMessageAt;
+
+    @Builder.Default
+    private LocalDateTime lastMessageAt = LocalDateTime.now();
 }

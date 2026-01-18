@@ -41,13 +41,17 @@ public class PostService {
     public Post create(PostDTO post) {
         System.out.println("Received post data: " + post);
         Post newPost = postMapper.toEntity(post);
-
+ 
         newPost.setCreator(cUser.get());
         newPost.setCreatedAt(LocalDateTime.now());
 
-         if (post.getSalary() != null){
-            post.setSalaryMin(post.getSalary());
-            post.setSalaryMax(post.getSalary());
+        if (post.getSalary() == null && (post.getSalaryRangeLower() == null || post.getSalaryRangeUpper() == null)) {
+            throw new IllegalArgumentException("Either salary or both salary range bounds must be provided.");
+        }
+
+        if (post.getSalary() != null){
+            post.setSalaryRangeLower(post.getSalary());
+            post.setSalaryRangeUpper(post.getSalary());
         }
         
         System.out.println("Creating post: " + newPost);
@@ -65,9 +69,13 @@ public class PostService {
             throw new IllegalAccessError("This post does not belong to current user!");
         }
 
+        if (request.getSalary() == null && (request.getSalaryRangeLower() == null || request.getSalaryRangeUpper() == null)) {
+            throw new IllegalArgumentException("Either salary or both salary range bounds must be provided.");
+        }
+
         if (request.getSalary() != null){
-            request.setSalaryMin(request.getSalary());
-            request.setSalaryMax(request.getSalary());
+            request.setSalaryRangeLower(request.getSalary());
+            request.setSalaryRangeUpper(request.getSalary());
         }
 
         post.setTitle(request.getTitle());
@@ -77,8 +85,8 @@ public class PostService {
         post.setEmploymentType(request.getEmploymentType());
         post.setJobCategory(request.getCategory());
         post.setSalary(request.getSalary());
-        post.setSalaryMin(request.getSalaryMin());
-        post.setSalaryMax(request.getSalaryMax());
+        post.setSalaryRangeLower(request.getSalaryRangeLower());
+        post.setSalaryRangeUpper(request.getSalaryRangeUpper());
         post.setSalaryCurrency(request.getSalaryCurrency());
         post.setRequirements(request.getRequirements());
         post.setResponsibilities(request.getResponsibilities());
@@ -182,9 +190,6 @@ public class PostService {
     public Page<Post> getMyPosts(Pageable pageable) {
         User currentUser = cUser.get();
         return getPostsByCreatorId(currentUser.getId(), pageable);
-    }
-
-
-    
+    } 
     
 }
