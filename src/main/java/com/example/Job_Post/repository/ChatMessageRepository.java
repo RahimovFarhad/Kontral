@@ -14,7 +14,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
     
     // Custom query methods can be defined here if needed
     // For example, to find messages by chat room ID or between two users
-    List<ChatMessage> findByChatRoomId(String chatId);
+    List<ChatMessage> findByChatRoomChatId(String chatId);
     
     List<ChatMessage> findBySenderIdAndRecipientId(Integer senderId, Integer recipientId);
 
