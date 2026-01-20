@@ -15,13 +15,20 @@ public class ChatUserDTO {
     private String email;     // MUST be Status enum, NOT String
     private Status status;     // MUST be Status enum, NOT String
 
+    private String firstName;
+    private String lastName;
+    private String contactNumber;
+
     private boolean hasUnseenMessageToCurrentUser;
 
-    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email) {
+    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email, String firstName, String lastName, String contactNumber) {
         this.id = id;
         this.nickName = (nickName != null) ? nickName : email;
         this.imageUrl = imageUrl;
         this.status = status;
         this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.contactNumber = contactNumber;
     }
 }

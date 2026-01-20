@@ -21,6 +21,10 @@ public class UserDTO {
     private String aboutMe; // "ONLINE", "OFFLINE"
     private String number;
 
+    private String firstName;
+    private String lastName;
+    private String contactNumber;       
+
     private String profileImage;
 
     private Double averageRating;

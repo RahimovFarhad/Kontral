@@ -65,6 +65,10 @@ public class User implements UserDetails {
 
     private String nickName;
 
+    private String firstName;
+    private String lastName;
+    private String contactNumber;
+
     private String aboutMe;
     private String imageUrl;
 

@@ -67,6 +67,8 @@ public class JobApplicationService {
 
         JobApplication savedJobApplication = jobApplicationRepository.save(jobApplication);
 
+        
+
         if (savedJobApplication != null) {
             try {
                 notificationService
@@ -83,6 +85,11 @@ public class JobApplicationService {
             }
             
         }
+
+        // To enhance user experience, we sync applier's data such as firstname, lastname, and etc. 
+        currentUser.setFirstName(jobApplication.getFirstName());
+        currentUser.setLastName(jobApplication.getLastName());
+        currentUser.setContactNumber(jobApplication.getContactNumber());
 
         return jobApplicationMapper.toDTO(savedJobApplication);
     }

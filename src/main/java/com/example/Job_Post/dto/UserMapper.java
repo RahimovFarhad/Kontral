@@ -52,6 +52,10 @@ public class UserMapper {
         userDTO.setNewChatMessageCount(chatMessageRepository.countByRecipientIdAndIsReadFalse(user.getId()));
         userDTO.setLinkedIn(user.getLinkedIn());
 
+        userDTO.setFirstName(user.getFirstName());
+        userDTO.setLastName(user.getLastName());
+        userDTO.setContactNumber(user.getContactNumber());
+
         
 
         return userDTO;
@@ -67,6 +71,10 @@ public class UserMapper {
         dto.setStatus(user.getStatus());
         dto.setHasUnseenMessageToCurrentUser(hasUnseen);
         dto.setImageUrl(user.getImageUrl());
+
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setContactNumber(user.getContactNumber());
 
         return dto;
     }
@@ -105,6 +113,10 @@ public class UserMapper {
         user.setUpdated_at(userDTO.getUpdatedAt());
         user.setPhoneNumber(userDTO.getNumber());
         user.setLinkedIn(userDTO.getLinkedIn());
+
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setContactNumber(userDTO.getContactNumber());
 
         // Handle status conversion (assuming Status is an enum)
         if (userDTO.getStatus() != null) {
