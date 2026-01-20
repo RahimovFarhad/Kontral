@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class NotificationDTO {
 
     private String content;
     private boolean isRead;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     
 }

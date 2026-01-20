@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ public class ChatNotification { //this is not an entity. You need to change it.
     private Integer senderId;
     private Integer recipientId;
     private String content;
-    private LocalDateTime timestamp;
+    private Instant timestamp;
     private Boolean isSystemGenerated = false;
 
 

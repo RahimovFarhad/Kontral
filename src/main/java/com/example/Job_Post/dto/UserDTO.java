@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 
@@ -24,8 +24,8 @@ public class UserDTO {
     private String profileImage;
 
     private Double averageRating;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     private List<SkillDTO> skills; // List of skills with endorsements
     private List<FileDTO> files; // List of uploaded files

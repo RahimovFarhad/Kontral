@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 
 import lombok.AllArgsConstructor;
@@ -19,5 +19,5 @@ public class ReviewDTO {
     private UserDTO receiver;
     private String review;
     private Integer rating;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

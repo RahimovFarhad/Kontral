@@ -1,6 +1,6 @@
 package com.example.Job_Post.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,7 +43,7 @@ public class PostService {
         Post newPost = postMapper.toEntity(post);
  
         newPost.setCreator(cUser.get());
-        newPost.setCreatedAt(LocalDateTime.now());
+        newPost.setCreatedAt(Instant.now());
 
         if (post.getSalary() == null && (post.getSalaryRangeLower() == null || post.getSalaryRangeUpper() == null)) {
             throw new IllegalArgumentException("Either salary or both salary range bounds must be provided.");
@@ -91,7 +91,7 @@ public class PostService {
         post.setRequirements(request.getRequirements());
         post.setResponsibilities(request.getResponsibilities());
         post.setApplicationDeadline(request.getApplicationDeadline());
-        post.setUpdatedAt(LocalDateTime.now());
+        post.setUpdatedAt(Instant.now());
     
 
         Post savedPost = postRepository.save(post);

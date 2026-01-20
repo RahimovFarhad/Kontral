@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ public class PostMapper {
                 .requirements(postDTO.getRequirements())
                 .responsibilities(postDTO.getResponsibilities())
                 .applicationDeadline(postDTO.getApplicationDeadline())
-                .updatedAt(LocalDateTime.now()) // Assuming this is the last updated time
+                .updatedAt(Instant.now()) // Assuming this is the last updated time
                 .createdAt(postDTO.getPostedTime())
                 .isNegotiable(postDTO.getIsNegotiable())
                 .build();

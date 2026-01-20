@@ -1,6 +1,6 @@
 package com.example.Job_Post.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ChatMessageService {
             .orElseThrow(() -> new IllegalStateException("Chat room could not be created"));
 
         chatMessage.setChatRoom(chatRoom);
-        chatMessage.setTimestamp(LocalDateTime.now());
+        chatMessage.setTimestamp(Instant.now());
         chatMessage.setIsRead(false); // Default to unread
 
 

@@ -1,6 +1,6 @@
 package com.example.Job_Post.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -29,7 +29,7 @@ public interface PostRepository extends JpaRepository<Post, Integer>, JpaSpecifi
 
     Page<Post> findByJobCategory(String jobCategory, Pageable pageable); // e.g., "Software Development", "Marketing"
 
-    Page<Post> findByApplicationDeadline(LocalDateTime jobCategory, Pageable pageable); // e.g., "Software Development", "Marketing"
+    Page<Post> findByApplicationDeadline(Instant jobCategory, Pageable pageable); // e.g., "Software Development", "Marketing"
  
     Page<Post> findAll(Pageable pageable);
 

@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,7 +27,7 @@ public class File {
     private String fileName;
     private String fileUrl;
 
-    private LocalDateTime uploadedAt;
+    private Instant uploadedAt;
     private Double size;
 
     private Boolean isActive;

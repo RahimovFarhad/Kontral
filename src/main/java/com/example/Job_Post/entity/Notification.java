@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.example.Job_Post.enumerator.NotificationType;
 import com.example.Job_Post.enumerator.SubjectType;
@@ -45,7 +45,7 @@ public class Notification {
     private boolean isRead = false; // Default value is false, meaning the notification is unread
 
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now(); // Default to current
+    private Instant createdAt = Instant.now(); // Default to current
 
 
 

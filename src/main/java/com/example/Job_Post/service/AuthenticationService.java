@@ -2,7 +2,8 @@ package com.example.Job_Post.service;
 
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -64,7 +65,7 @@ public class AuthenticationService {
         if (user.getVerified() == null || !user.getVerified()){
             final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
             user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
-            user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
+            user.setVerificationTokenExpiry(Instant.now().plus(Duration.ofMinutes(verificationTokenExpiryMinute)));
             
             userRepository.save(user);
 

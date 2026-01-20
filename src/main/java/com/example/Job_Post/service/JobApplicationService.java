@@ -1,7 +1,7 @@
 package com.example.Job_Post.service;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public class JobApplicationService {
         }
 
         JobApplication jobApplication = jobApplicationMapper.toEntity(request);
-        jobApplication.setAppliedAt(LocalDateTime.now());
+        jobApplication.setAppliedAt(Instant.now());
         jobApplication.setWithdrawn(false);
         jobApplication.setFinalSalary(jobApplication.getPost().getSalary());
 
@@ -195,7 +195,7 @@ public class JobApplicationService {
                     jobApplication.getPost().getId(), jobApplication.getId()))
                 .isSystemGenerated(true)
                 .isRead(false)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
 
             ChatMessage savedMessage = chatMessageService.saveMessage(systemMessage);
@@ -224,7 +224,7 @@ public class JobApplicationService {
                     jobApplication.getPost().getId(), jobApplication.getId()))
                 .isSystemGenerated(true)
                 .isRead(false)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
 
             ChatMessage savedMessage = chatMessageService.saveMessage(systemMessage);
@@ -253,7 +253,7 @@ public class JobApplicationService {
                     jobApplication.getPost().getId(), jobApplication.getId()))
                 .isSystemGenerated(true)
                 .isRead(false)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .build();
 
             ChatMessage savedMessage = chatMessageService.saveMessage(systemMessage);

@@ -1,6 +1,7 @@
 package com.example.Job_Post.service;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -70,7 +71,7 @@ public class RegisterService {
     //         if (user.getAuthMethod().equals(AuthMethod.Custom) && authMethod.equals(AuthMethod.Custom)) {
     //             if (user.getVerified())
     //                 throw new IllegalArgumentException("Email already exists");
-    //             else if(user.getVerificationTokenHash() != null && !LocalDateTime.now().isAfter(user.getVerificationTokenExpiry())){
+    //             else if(user.getVerificationTokenHash() != null && !Instant.now().isAfter(user.getVerificationTokenExpiry())){
     //                 throw new IllegalArgumentException("A Verification Link Already Sent");
     //             }
     //         }
@@ -83,7 +84,7 @@ public class RegisterService {
     //         user.setPassword(passwordEncoder.encode(request.getPassword()));
     //         user.setNickName(null);
     //         user.setPhoneNumber(request.getPhoneNumber());  
-    //         user.setUpdated_at(LocalDateTime.now()); // Assuming you have an updated_at field in User
+    //         user.setUpdated_at(Instant.now()); // Assuming you have an updated_at field in User
     //     }
 
     //     Boolean existsByPhoneNumber = userRepository.existsByPhoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "");
@@ -94,7 +95,7 @@ public class RegisterService {
     //     else if (!updatesToCustom && !existsByEmail && !existsByPhoneNumber) {
     //         user = User.builder()
     //                             .nickName(null) // Nickname can be set later")
-    //                             .updated_at(LocalDateTime.now()) // Assuming you have an updated_at field in User
+    //                             .updated_at(Instant.now()) // Assuming you have an updated_at field in User
     //                             .phoneNumber(request.getPhoneNumber())
     //                             .email(request.getEmail())
     //                             .role(Role.USER) // Assuming Role is an enum with USER as one of the values
@@ -111,7 +112,7 @@ public class RegisterService {
     //     if (user.getAuthMethod() == AuthMethod.Custom){
     //         final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
     //         user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
-    //         user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
+    //         user.setVerificationTokenExpiry(Instant.now().plusMinutes(verificationTokenExpiryMinute));
     //         user.setVerified(false);
 
     //         savedUser = userRepository.save(user);
@@ -153,7 +154,7 @@ public class RegisterService {
             if (user.getAuthMethod().equals(AuthMethod.Custom) && authMethod.equals(AuthMethod.Custom)) {
                 if (user.getVerified())
                     throw new IllegalArgumentException("Email already exists");
-                else if(user.getVerificationTokenHash() != null && !LocalDateTime.now().isAfter(user.getVerificationTokenExpiry())){
+                else if(user.getVerificationTokenHash() != null && !Instant.now().isAfter(user.getVerificationTokenExpiry())){
                     throw new IllegalArgumentException("A Verification Link Already Sent");
                 }
             }
@@ -166,7 +167,7 @@ public class RegisterService {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setNickName(null);
             user.setPhoneNumber(request.getPhoneNumber());  
-            user.setUpdated_at(LocalDateTime.now()); // Assuming you have an updated_at field in User
+            user.setUpdated_at(Instant.now()); // Assuming you have an updated_at field in User
         }
 
         Boolean existsByPhoneNumber = userRepository.existsByPhoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : "");
@@ -177,7 +178,7 @@ public class RegisterService {
         else if (!updatesToCustom && !existsByEmail && !existsByPhoneNumber) {
             user = User.builder()
                                 .nickName(null) // Nickname can be set later")
-                                .updated_at(LocalDateTime.now()) // Assuming you have an updated_at field in User
+                                .updated_at(Instant.now()) // Assuming you have an updated_at field in User
                                 .phoneNumber(request.getPhoneNumber())
                                 .email(request.getEmail())
                                 .role(Role.USER) // Assuming Role is an enum with USER as one of the values
@@ -194,7 +195,7 @@ public class RegisterService {
         if (user.getAuthMethod() == AuthMethod.Custom){
             final String verificationToken = verificationTokenService.generateToken(verificationTokenByteLength);
             user.setVerificationTokenHash(passwordEncoder.encode(verificationToken));
-            user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
+            user.setVerificationTokenExpiry(Instant.now().plus(Duration.ofMinutes(verificationTokenExpiryMinute)));
             user.setVerified(true); // temporary because email sending is disabled
             savedUser = userRepository.save(user);
 
@@ -259,7 +260,7 @@ public class RegisterService {
             resetToken = resetTokenRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Reset token not found for email: " + email));
             resetToken.setTokenHash(passwordEncoder.encode(resetTokenHash));
-            resetToken.setExpiryTime(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute));
+            resetToken.setExpiryTime(Instant.now().plus(Duration.ofMinutes(verificationTokenExpiryMinute)));
             resetTokenRepository.save(resetToken);
             emailService.sendForgotPasswordEmail(user.getEmail(), resetTokenHash);
             return;
@@ -268,7 +269,7 @@ public class RegisterService {
             resetToken = ResetToken.builder()
                 .tokenHash(passwordEncoder.encode(resetTokenHash))
                 .user(user)
-                .expiryTime(LocalDateTime.now().plusMinutes(verificationTokenExpiryMinute))
+                .expiryTime(Instant.now().plus(Duration.ofMinutes(verificationTokenExpiryMinute)))
                 .build();
         }
         

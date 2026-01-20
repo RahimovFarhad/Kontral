@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -31,6 +31,6 @@ public class ResetToken {
     private User user;
 
 
-    private LocalDateTime expiryTime; // Store expiry as a timestamp (milliseconds since epoch)
+    private Instant expiryTime; // Store expiry as a timestamp (milliseconds since epoch)
 
 }

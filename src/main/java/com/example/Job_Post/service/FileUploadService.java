@@ -5,7 +5,8 @@ package com.example.Job_Post.service;
 import com.cloudinary.*;
 import com.cloudinary.utils.ObjectUtils;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
@@ -45,8 +46,10 @@ public class FileUploadService {
 
     public static String generateFileName(String entity, Integer entityId, String field) {
         // Timestamp
-        String timestamp = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+            .withZone(ZoneId.systemDefault())
+            .format(Instant.now());
+
 
         // UUID (to avoid collisions)
         String uniqueId = UUID.randomUUID().toString().substring(0, 8);

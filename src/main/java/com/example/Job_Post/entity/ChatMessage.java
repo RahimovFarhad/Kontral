@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,7 +42,7 @@ public class ChatMessage {
 
     private String content;
 
-    private LocalDateTime timestamp;
+    private Instant timestamp;
 
     @Builder.Default
     private Boolean isRead = false; // Indicates if the message has been read by the recipient
@@ -54,7 +54,7 @@ public class ChatMessage {
 
     @PrePersist
     public void onSend() {
-        if (timestamp == null) timestamp = LocalDateTime.now();
+        if (timestamp == null) timestamp = Instant.now();
         chatRoom.setLastMessageAt(timestamp);
     }
 

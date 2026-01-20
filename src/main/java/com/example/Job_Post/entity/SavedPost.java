@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,6 +32,6 @@ public class SavedPost {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime savedAt;
+    private Instant savedAt;
 
 }

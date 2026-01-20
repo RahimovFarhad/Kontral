@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +64,7 @@ public class JobApplication {
     private JobApplicationStatus status; // e.g., "Applied", "Interviewing", "Rejected", "Accepted"
 
     @Builder.Default
-    private LocalDateTime appliedAt = LocalDateTime.now(); // Date when the application was submitted
+    private Instant appliedAt = Instant.now(); // Date when the application was submitted
 
     private String firstName;
     private String lastName;

@@ -1,7 +1,7 @@
 package com.example.Job_Post.controller;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +55,7 @@ public class FileController {
             File newFile = File.builder()
                 .fileName(file.getOriginalFilename())
                 .fileUrl(url)
-                .uploadedAt(LocalDateTime.now())
+                .uploadedAt(Instant.now())
                 .size(file.getSize() / 1024.0) // size in KB
                 .user(user)
                 .isActive(true)

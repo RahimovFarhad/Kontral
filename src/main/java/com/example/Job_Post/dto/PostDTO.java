@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,8 +37,8 @@ public class PostDTO {
     private String requirements;
     private String responsibilities;
     
-    private LocalDateTime applicationDeadline;
-    private LocalDateTime postedTime;
+    private Instant applicationDeadline;
+    private Instant postedTime;
 
     // Additional fields can be added as needed
     private Boolean isSavedByCurrentUser;

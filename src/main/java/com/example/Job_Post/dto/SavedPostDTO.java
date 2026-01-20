@@ -1,5 +1,5 @@
 package com.example.Job_Post.dto;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import lombok.*;
 
@@ -15,6 +15,6 @@ public class SavedPostDTO {
     private PostDTO postDTO;
     private UserDTO userDTO;
 
-    private LocalDateTime savedAt;
+    private Instant savedAt;
 
 }

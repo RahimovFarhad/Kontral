@@ -2,7 +2,7 @@ package com.example.Job_Post.controller;
 
 
 import java.security.Principal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -85,9 +85,9 @@ public class UserController {
     //     }
 
     //     String storedHashedToken = user.getVerificationTokenHash();
-    //     LocalDateTime expiry = user.getVerificationTokenExpiry();
+    //     Instant expiry = user.getVerificationTokenExpiry();
 
-    //     if (expiry == null || LocalDateTime.now().isAfter(expiry)) {
+    //     if (expiry == null || Instant.now().isAfter(expiry)) {
     //         return ResponseEntity.badRequest().body("Verification link expired.");
     //     }
 
@@ -120,9 +120,9 @@ public class UserController {
         }
 
         ResetToken storedToken = user.getResetToken();
-        LocalDateTime expiry = storedToken.getExpiryTime();
+        Instant expiry = storedToken.getExpiryTime();
 
-        if (expiry == null || LocalDateTime.now().isAfter(expiry)) {
+        if (expiry == null || Instant.now().isAfter(expiry)) {
             return ResponseEntity.badRequest().body("Verification link expired.");
         }
 
@@ -144,9 +144,9 @@ public class UserController {
             }
     
             ResetToken storedToken = user.getResetToken();
-            LocalDateTime expiry = storedToken.getExpiryTime();
+            Instant expiry = storedToken.getExpiryTime();
     
-            if (expiry == null || LocalDateTime.now().isAfter(expiry)) {
+            if (expiry == null || Instant.now().isAfter(expiry)) {
                 return ResponseEntity.badRequest().body("Verification link expired.");
             }
     

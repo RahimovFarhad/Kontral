@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +21,5 @@ public class FileDTO {
 
     private Boolean isActive;
 
-    private LocalDateTime uploadedAt;
+    private Instant uploadedAt;
 }

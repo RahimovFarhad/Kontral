@@ -1,7 +1,7 @@
 package com.example.Job_Post.entity;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -43,6 +43,6 @@ public class Review {
     private Integer rating;
 
     @Builder.Default
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    private final Instant createdAt = Instant.now();
 
 }

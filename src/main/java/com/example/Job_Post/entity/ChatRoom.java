@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,8 +35,8 @@ public class ChatRoom {
     private User user2;
 
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Builder.Default
-    private LocalDateTime lastMessageAt = LocalDateTime.now();
+    private Instant lastMessageAt = Instant.now();
 }

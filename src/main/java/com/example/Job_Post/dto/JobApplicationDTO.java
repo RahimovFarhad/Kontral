@@ -1,6 +1,6 @@
 package com.example.Job_Post.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import com.example.Job_Post.enumerator.JobApplicationStatus;
@@ -29,7 +29,7 @@ public class JobApplicationDTO {
     private String other;
     private String email;
 
-    private LocalDateTime appliedAt;
+    private Instant appliedAt;
     private Double finalSalary;
     
 }

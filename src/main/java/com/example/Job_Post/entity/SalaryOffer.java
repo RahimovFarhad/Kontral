@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.Entity;
@@ -37,5 +37,5 @@ public class SalaryOffer {
     private boolean isResponded; // whether the offer has been responded to
 
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Instant createdAt = Instant.now();
 }

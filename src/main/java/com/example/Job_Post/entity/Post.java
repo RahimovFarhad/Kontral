@@ -1,5 +1,5 @@
 package com.example.Job_Post.entity;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -71,10 +71,10 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String responsibilities; // e.g., "Develop and maintain web applications"
     
-    private LocalDateTime applicationDeadline; // e.g., "2023-12-31"
+    private Instant applicationDeadline; // e.g., "2023-12-31"
 
-    private LocalDateTime createdAt; 
-    private LocalDateTime updatedAt;
+    private Instant createdAt; 
+    private Instant updatedAt;
 
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)

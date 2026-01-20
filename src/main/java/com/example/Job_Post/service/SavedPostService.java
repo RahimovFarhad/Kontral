@@ -1,6 +1,6 @@
 package com.example.Job_Post.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -38,7 +38,7 @@ public class SavedPostService  {
         SavedPost savedPost = SavedPost.builder().
                                     post(post).
                                     user(currentUser).
-                                    savedAt(LocalDateTime.now()).
+                                    savedAt(Instant.now()).
                                     build();
 
         return savedPostRepository.save(savedPost);

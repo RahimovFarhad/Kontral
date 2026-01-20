@@ -1,6 +1,6 @@
 package com.example.Job_Post.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,7 +56,7 @@ public class User implements UserDetails {
     private Integer id;
 
     private String verificationTokenHash;
-    private LocalDateTime verificationTokenExpiry;
+    private Instant verificationTokenExpiry;
     private Boolean verified;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -89,8 +89,8 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     @Builder.Default
-    private LocalDateTime created_at = LocalDateTime.now();
-    private LocalDateTime updated_at;
+    private Instant created_at = Instant.now();
+    private Instant updated_at;
     private String password;
 
     private Double averageRating;
