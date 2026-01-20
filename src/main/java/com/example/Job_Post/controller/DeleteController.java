@@ -42,8 +42,8 @@ public class DeleteController {
         try {
             ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
                     .httpOnly(true)
-                    .secure(true) // localhost
-                    .sameSite("None") // required for cross-origin
+                    .secure(true) 
+                    .sameSite("None")
                     .path("/")
                     .maxAge(0)
                     .build();

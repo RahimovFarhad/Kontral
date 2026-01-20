@@ -75,6 +75,7 @@ public class SecurityConfig {
                     "/api/v1/user/validate-reset-token",
                     "/api/v1/user/profile/*",
                     "/api/v1/auth/refresh",
+                    "/api/v1/terminate/logout",
                     "/index.html",
                     "/js/**",
                     "/app/**",
