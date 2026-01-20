@@ -50,8 +50,8 @@ public class PostService {
         }
 
         if (post.getSalary() != null){
-            post.setSalaryRangeLower(post.getSalary());
-            post.setSalaryRangeUpper(post.getSalary());
+            newPost.setSalaryRangeLower(post.getSalary());
+            newPost.setSalaryRangeUpper(post.getSalary());
         }
         
         System.out.println("Creating post: " + newPost);
