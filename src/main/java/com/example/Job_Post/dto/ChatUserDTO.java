@@ -21,12 +21,16 @@ public class ChatUserDTO {
 
     private boolean hasUnseenMessageToCurrentUser;
 
-    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email, String firstName, String lastName, String contactNumber) {
+    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email) {
         this.id = id;
         this.nickName = (nickName != null) ? nickName : email;
         this.imageUrl = imageUrl;
         this.status = status;
         this.email = email;
+    }
+
+    public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email, String firstName, String lastName, String contactNumber) {
+        this(id, nickName, imageUrl, status, email);
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactNumber = contactNumber;
