@@ -43,6 +43,7 @@ public class JobApplicationService {
 
     private final SalaryNegotiationRepository salaryNegotiationRepository;
     private final CurrentUser cUser;
+    private final UserService userService;
 
 
     public JobApplicationDTO apply(JobApplicationDTO request) {        
@@ -90,6 +91,8 @@ public class JobApplicationService {
         currentUser.setFirstName(jobApplication.getFirstName());
         currentUser.setLastName(jobApplication.getLastName());
         currentUser.setContactNumber(jobApplication.getContactNumber());
+        userService.save(currentUser);
+        
 
         return jobApplicationMapper.toDTO(savedJobApplication);
     }
