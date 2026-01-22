@@ -28,22 +28,16 @@ public class PostSpecification {
         };
     }
 
-    public static Specification<Post> filterByPriceRange(Integer minPrice, Integer maxPrice) {
+    public static Specification<Post> filterByMinimumPrice(Integer minPrice) {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
             Predicate fixedMatches = cb.conjunction();
             Predicate rangeMatches = cb.conjunction();
 
             boolean hasMin = (minPrice != null && minPrice >= 0);
-            boolean hasMax = (maxPrice != null && maxPrice >= 0);
 
             // No filtering requested
-            if (!hasMin && !hasMax) {
-                return cb.conjunction();
-            }
-
-            // Invalid range requested
-            if (hasMin && hasMax && minPrice > maxPrice) {
+            if (!hasMin) {
                 return cb.conjunction();
             }
 
@@ -62,14 +56,9 @@ public class PostSpecification {
                 fixedMatches = cb.and(fixedMatches, cb.greaterThanOrEqualTo(root.get("salary"), minPrice.doubleValue()));
                 rangeMatches = cb.and(rangeMatches, cb.greaterThanOrEqualTo(root.get("salaryRangeLower"), minPrice.doubleValue()));
             }
-            if (hasMax) {
-                fixedMatches = cb.and(fixedMatches, cb.lessThanOrEqualTo(root.get("salary"), maxPrice.doubleValue()));
-                rangeMatches = cb.and(rangeMatches, cb.lessThanOrEqualTo(root.get("salaryRangeUpper"), maxPrice.doubleValue()));
-            }
 
             predicate = cb.or(fixedMatches, rangeMatches);
-
-
+            
             return predicate;
         };
     }
@@ -96,12 +85,12 @@ public class PostSpecification {
     }
 
     public static Specification<Post> combineFilters(String search, String category, 
-                                                      Integer minPrice, Integer maxPrice, 
+                                                      Integer minPrice,
                                                       String employmentType) {
         return Specification
             .where(filterBySearchQuery(search))
             .and(filterByCategory(category))
-            .and(filterByPriceRange(minPrice, maxPrice))
+            .and(filterByMinimumPrice(minPrice))
             .and(filterByEmploymentType(employmentType));
     }
 }

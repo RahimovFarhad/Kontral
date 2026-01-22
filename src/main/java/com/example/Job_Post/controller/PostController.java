@@ -74,7 +74,6 @@ public class PostController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) String employmentType,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @PageableDefault(size = 10) Pageable pageable,
@@ -82,7 +81,7 @@ public class PostController {
     ) {
         try {            
             Page<PostDTO> page = postService.getAllPosts(
-                search, category, minPrice, maxPrice, employmentType, sortBy, pageable
+                search, category, minPrice, employmentType, sortBy, pageable
             );
             
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
