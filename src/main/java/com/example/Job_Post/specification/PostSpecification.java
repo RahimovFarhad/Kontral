@@ -31,6 +31,8 @@ public class PostSpecification {
     public static Specification<Post> filterByPriceRange(Integer minPrice, Integer maxPrice) {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
+            Predicate fixedMatches = cb.conjunction();
+            Predicate rangeMatches = cb.conjunction();
 
             boolean hasMin = (minPrice != null && minPrice >= 0);
             boolean hasMax = (maxPrice != null && maxPrice >= 0);
@@ -45,33 +47,28 @@ public class PostSpecification {
                 return cb.conjunction();
             }
 
-            Double salary = root.get("salary").toString().isEmpty() ? null : Double.valueOf(root.get("salary").toString());
-            Double salaryRangeLower = root.get("salaryRangeLower").toString().isEmpty() ? null : Double.valueOf(root.get("salaryRangeLower").toString());
-            Double salaryRangeUpper = root.get("salaryRangeUpper").toString().isEmpty() ? null : Double.valueOf(root.get("salaryRangeUpper").toString());
+            Predicate salaryIsPresent = cb.isNotNull(root.get("salary"));
+            Predicate rangeIsPresent = cb.and(
+                cb.isNotNull(root.get("salaryRangeLower")),
+                cb.isNotNull(root.get("salaryRangeUpper"))
+            );
 
-            if (salary == null && (salaryRangeLower == null || salaryRangeUpper == null)) {
-                return cb.conjunction();
-            }
-            Boolean isFixedSalary = (salary != null);
+            fixedMatches = salaryIsPresent;
+            rangeMatches = rangeIsPresent;
 
-            // Predicate list
-            if (isFixedSalary) {
-                // Fixed salary filtering
-                if (hasMin) {
-                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("salary"), minPrice.doubleValue()));
-                }
-                if (hasMax) {
-                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("salary"), maxPrice.doubleValue()));
-                }
-            } else {
-                // Salary range filtering
-                if (hasMin) {
-                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("salaryRangeLower"), minPrice.doubleValue()));
-                }
-                if (hasMax) {
-                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("salaryRangeUpper"), maxPrice.doubleValue()));
-                }
+            rangeMatches = cb.and(rangeMatches, cb.greaterThanOrEqualTo(root.get("salaryRangeUpper"), root.get("salaryRangeLower")));
+
+            if (hasMin) {
+                fixedMatches = cb.and(fixedMatches, cb.greaterThanOrEqualTo(root.get("salary"), minPrice.doubleValue()));
+                rangeMatches = cb.and(rangeMatches, cb.greaterThanOrEqualTo(root.get("salaryRangeLower"), minPrice.doubleValue()));
             }
+            if (hasMax) {
+                fixedMatches = cb.and(fixedMatches, cb.lessThanOrEqualTo(root.get("salary"), maxPrice.doubleValue()));
+                rangeMatches = cb.and(rangeMatches, cb.lessThanOrEqualTo(root.get("salaryRangeUpper"), maxPrice.doubleValue()));
+            }
+
+            predicate = cb.or(fixedMatches, rangeMatches);
+
 
             return predicate;
         };
