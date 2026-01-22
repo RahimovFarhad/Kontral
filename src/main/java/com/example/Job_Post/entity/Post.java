@@ -64,7 +64,7 @@ public class Post {
     private Double salaryRangeUpper;
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
-    private Boolean isSalaryNegotiable; // e.g., true if salary is negotiable
+    private Boolean isNegotiable; // e.g., true if salary is negotiable
 
     @Column(columnDefinition = "TEXT")
     private String requirements; // e.g., "Bachelor's degree in Computer Science or related field"
@@ -80,6 +80,5 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobApplication> applications;
 
-    private Boolean isNegotiable;
 
 }
