@@ -32,48 +32,48 @@ public class PostSpecification {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
 
-            // Skip if both filters are null
-            if ( ((minPrice == null || minPrice < 0) && (maxPrice == null || maxPrice < 0))
-                || (minPrice != null && maxPrice != null && minPrice > maxPrice) ){
-                return predicate;
+            boolean hasMin = (minPrice != null && minPrice >= 0);
+            boolean hasMax = (maxPrice != null && maxPrice >= 0);
+
+            // No filtering requested
+            if (!hasMin && !hasMax) {
+                return cb.conjunction();
             }
+
+            // Invalid range requested
+            if (hasMin && hasMax && minPrice > maxPrice) {
+                return cb.conjunction();
+            }
+
+            Double salary = root.get("salary").toString().isEmpty() ? null : Double.valueOf(root.get("salary").toString());
+            Double salaryRangeLower = root.get("salaryRangeLower").toString().isEmpty() ? null : Double.valueOf(root.get("salaryRangeLower").toString());
+            Double salaryRangeUpper = root.get("salaryRangeUpper").toString().isEmpty() ? null : Double.valueOf(root.get("salaryRangeUpper").toString());
+
+            if (salary == null && (salaryRangeLower == null || salaryRangeUpper == null)) {
+                return cb.conjunction();
+            }
+            Boolean isFixedSalary = (salary != null);
 
             // Predicate list
-            Predicate numericPredicate = cb.conjunction();
-
-            // --- Case 1: Salary (numeric field) ---
-            if (minPrice != null && minPrice >= 0) {
-                numericPredicate = cb.and(numericPredicate,
-                    cb.greaterThanOrEqualTo(root.get("salary"), minPrice.doubleValue()));
-            }
-            if (maxPrice != null && maxPrice >= 0) {
-                numericPredicate = cb.and(numericPredicate,
-                    cb.lessThanOrEqualTo(root.get("salary"), maxPrice.doubleValue()));
-            }
-
-            // --- Case 2: Salary range (string like "2000-3000") ---
-            Predicate rangePredicate = cb.conjunction();
-
-            if (minPrice != null && minPrice >= 0 || maxPrice != null && maxPrice >= 0) {
-                // handle null or malformed ranges gracefully
-                Predicate lowerBound = cb.conjunction();
-                Predicate upperBound = cb.conjunction();
-
-                if (minPrice != null && minPrice >= 0) {
-                    lowerBound = cb.greaterThanOrEqualTo(root.get("salaryMin"), minPrice.doubleValue());
+            if (isFixedSalary) {
+                // Fixed salary filtering
+                if (hasMin) {
+                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("salary"), minPrice.doubleValue()));
                 }
-                if (maxPrice != null && maxPrice >= 0) {
-                    upperBound = cb.lessThanOrEqualTo(root.get("salaryMax"), maxPrice.doubleValue());
+                if (hasMax) {
+                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("salary"), maxPrice.doubleValue()));
                 }
-
-
-                rangePredicate = cb.and(lowerBound, upperBound);
+            } else {
+                // Salary range filtering
+                if (hasMin) {
+                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("salaryRangeLower"), minPrice.doubleValue()));
+                }
+                if (hasMax) {
+                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("salaryRangeUpper"), maxPrice.doubleValue()));
+                }
             }
 
-            // Combine both salary or salaryRange
-            return cb.or(numericPredicate, rangePredicate);
-
-
+            return predicate;
         };
     }
 
