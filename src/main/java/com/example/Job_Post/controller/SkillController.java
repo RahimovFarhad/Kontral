@@ -35,6 +35,9 @@ public class SkillController {
             if (skill == null) {
                 return ResponseEntity.badRequest().body("Invalid skill data");
             }
+            if (skill.getLevel() < 40 || skill.getLevel() > 100) {
+                return ResponseEntity.badRequest().body("Skill level must be between 40 and 100");
+            }
 
             skill.setUser(user);
             Skill savedSkill = skillRepository.save(skill);
