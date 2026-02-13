@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Job_Post.auth.DeleteRequest;
 import com.example.Job_Post.service.AuthenticationService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 

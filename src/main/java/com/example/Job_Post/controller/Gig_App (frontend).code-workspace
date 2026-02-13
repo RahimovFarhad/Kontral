@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../../../projects (personal)/Gig_App (frontend)"
+		},
+		{
+			"path": "../../../../../../../../UoL-COMP/comp2860-semester-1-week-1-RahimovFarhad"
+		},
+		{
+			"path": "../../../../../../../../UoL-COMP/comp2850-hci-starter"
+		},
+		{
+			"path": "../../../../../../.."
+		},
+		{
+			"path": "../../../../../../../../render-keep-alive"
+		},
+		{
+			"path": "../../../../../../../../projects (personal)/cloudflare_ai_agent"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "student-kotlin-RahimovFarhad",
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}
