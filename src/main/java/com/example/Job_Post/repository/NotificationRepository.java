@@ -36,7 +36,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     int markAsReadByUserIdAndIds(
         @Param("userId") Integer userId,
         @Param("notificationIds") List<Integer> notificationIds
-);
+    );
 
 
     

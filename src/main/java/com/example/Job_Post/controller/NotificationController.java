@@ -63,19 +63,21 @@ public class NotificationController {
     }
 
     @PutMapping("/read-batch")
-    public ResponseEntity<?> setNotificationsReadBatch(
-        @RequestBody List<Integer> notificationIds,
-        Principal principal
-    ) {
-        try {
-            User myUser = userService.getUserByEmail(principal.getName());
-            int updated = notificationService.setNotificationsReadBatch(myUser, notificationIds);
-            return ResponseEntity.ok(updated);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Unable to set notifications read: " + e.getMessage());
-        }
+public ResponseEntity<?> setNotificationsReadBatch(
+    @RequestBody List<Integer> notificationIds,
+    Principal principal
+) {
+    try {
+        User myUser = userService.getUserByEmail(principal.getName());
+        int updated = notificationService.setNotificationsReadBatch(myUser, notificationIds);
+        System.out.println("read-batch user=" + myUser.getId() + " ids=" + notificationIds + " updated=" + updated);
+        return ResponseEntity.ok(updated);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.badRequest().body("Unable to set notifications read: " + e.getMessage());
     }
+}
+
 
 
 
