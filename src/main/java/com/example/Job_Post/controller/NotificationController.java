@@ -72,6 +72,7 @@ public class NotificationController {
             int updated = notificationService.setNotificationsReadBatch(myUser, notificationIds);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body("Unable to set notifications read: " + e.getMessage());
         }
     }
