@@ -115,7 +115,9 @@ public class NotificationService {
     }
 
 
+    @Transactional
     public int setNotificationsReadBatch(User user, List<Integer> notificationIds) {
+        if (notificationIds == null || notificationIds.isEmpty()) return 0;
         return notificationRepository.markAsReadByUserIdAndIds(user.getId(), notificationIds);
     }
     
