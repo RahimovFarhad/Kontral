@@ -1,5 +1,7 @@
 package com.example.Job_Post.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -110,6 +112,11 @@ public class NotificationService {
     @Transactional
     public int setAllNotificationsRead(User user){
         return notificationRepository.markAllAsReadByUserId(user.getId());
+    }
+
+
+    public int setNotificationsReadBatch(User user, List<Integer> notificationIds) {
+        return notificationRepository.markAsReadByUserIdAndIds(user.getId(), notificationIds);
     }
     
 }

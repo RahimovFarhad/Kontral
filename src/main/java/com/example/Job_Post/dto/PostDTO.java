@@ -18,7 +18,9 @@ public class PostDTO {
     private String title; 
     private String description; 
 
+    private Boolean isCompany;
     private String companyName; 
+
     private String location;
 
     private String employmentType;

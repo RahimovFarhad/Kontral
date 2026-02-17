@@ -1,6 +1,7 @@
 package com.example.Job_Post.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,6 +61,22 @@ public class NotificationController {
             return ResponseEntity.badRequest().body("Unable to set notification read: " + e.getMessage() );
         }
     }
+
+    @PutMapping("/read-batch")
+    public ResponseEntity<?> setNotificationsReadBatch(
+        @RequestBody List<Integer> notificationIds,
+        Principal principal
+    ) {
+        try {
+            User myUser = userService.getUserByEmail(principal.getName());
+            int updated = notificationService.setNotificationsReadBatch(myUser, notificationIds);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Unable to set notifications read: " + e.getMessage());
+        }
+    }
+
+
 
     @PutMapping("/mark-all-read")
     public ResponseEntity<?> setAllMyNotificationsRead(Principal principal){

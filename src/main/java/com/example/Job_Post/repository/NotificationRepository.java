@@ -1,5 +1,7 @@
 package com.example.Job_Post.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +24,20 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.notifiedUser.id = :userId")
     int markAllAsReadByUserId(@Param("userId") Integer userId);
+
+    @Modifying
+    @Query("""
+        UPDATE Notification n
+        SET n.isRead = true
+        WHERE n.notifiedUser.id = :userId
+        AND n.id IN :notificationIds
+        AND n.isRead = false
+    """)
+    int markAsReadByUserIdAndIds(
+        @Param("userId") Integer userId,
+        @Param("notificationIds") List<Integer> notificationIds
+);
+
 
     
 }
