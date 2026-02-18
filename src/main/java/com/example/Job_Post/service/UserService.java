@@ -2,6 +2,7 @@ package com.example.Job_Post.service;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ import com.example.Job_Post.dto.UserDTO;
 import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.ChatRelationshipStatus;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
 import com.example.Job_Post.repository.ChatRoomRepository;
@@ -29,6 +31,7 @@ public class UserService {
     private final ChatMessageRepository chatMessageRepository;
     private final CurrentUser cUser;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRelationshipTagService userRelationshipTagService;
 
     public User connectUser(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -132,18 +135,26 @@ public class UserService {
                 chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
 
         List<ChatUserDTO> users = userRepository.findAllChatUsersLight();
+        Map<Integer, ChatRelationshipStatus> relationshipByUserId =
+            userRelationshipTagService.getRelationshipMapForCurrentUser(
+                currentUser.getId(),
+                users.stream().map(ChatUserDTO::getId).toList()
+            );
 
         // Set the unseen message flag
         for (ChatUserDTO u : users) {
             u.setHasUnseenMessageToCurrentUser(
                     sendersWithUnread.contains(u.getId())
             );
+            u.setRelationship(
+                relationshipByUserId.getOrDefault(u.getId(), ChatRelationshipStatus.NONE)
+            );
         }
 
         return users;
     }
 
-    public Object getMyChatUsers() {
+    public List<ChatUserDTO> getMyChatUsers() {
         User currentUser = cUser.get();
 
         Set<Integer> sendersWithUnread =
@@ -159,16 +170,29 @@ public class UserService {
                     return userMapper.toChatDTO(otherUser, false);
                 })
                 .toList();
+
+        Map<Integer, ChatRelationshipStatus> relationshipByUserId =
+            userRelationshipTagService.getRelationshipMapForCurrentUser(
+                currentUser.getId(),
+                users.stream().map(ChatUserDTO::getId).toList()
+            );
         
         for (ChatUserDTO u : users) {
             if (sendersWithUnread.size() == 0) {
-                break;
+                u.setRelationship(
+                    relationshipByUserId.getOrDefault(u.getId(), ChatRelationshipStatus.NONE)
+                );
+                continue;
             }
 
             if (sendersWithUnread.contains(u.getId())) {
                 u.setHasUnseenMessageToCurrentUser(true);
                 sendersWithUnread.remove(u.getId());
             }
+
+            u.setRelationship(
+                relationshipByUserId.getOrDefault(u.getId(), ChatRelationshipStatus.NONE)
+            );
             
         }
 

@@ -1,5 +1,6 @@
 package com.example.Job_Post.dto;
 
+import com.example.Job_Post.enumerator.ChatRelationshipStatus;
 import com.example.Job_Post.enumerator.Status;
 
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ChatUserDTO {
     private String contactNumber;
 
     private boolean hasUnseenMessageToCurrentUser;
+    private ChatRelationshipStatus relationship;
 
     public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email) {
         this.id = id;

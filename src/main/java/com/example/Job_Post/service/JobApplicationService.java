@@ -44,6 +44,7 @@ public class JobApplicationService {
     private final SalaryNegotiationRepository salaryNegotiationRepository;
     private final CurrentUser cUser;
     private final UserService userService;
+    private final UserRelationshipTagService userRelationshipTagService;
 
 
     public JobApplicationDTO apply(JobApplicationDTO request) {        
@@ -67,6 +68,7 @@ public class JobApplicationService {
         jobApplication.setFinalSalary(jobApplication.getPost().getSalary());
 
         JobApplication savedJobApplication = jobApplicationRepository.save(jobApplication);
+        userRelationshipTagService.upsertFromJobApplication(savedJobApplication);
 
         
 
@@ -310,7 +312,9 @@ public class JobApplicationService {
             }
         }
 
-        return jobApplicationRepository.save(jobApplication);
+        JobApplication savedJobApplication = jobApplicationRepository.save(jobApplication);
+        userRelationshipTagService.upsertFromJobApplication(savedJobApplication);
+        return savedJobApplication;
     }
 
     public String withdrawJobApplicationById(Integer id) {
@@ -325,6 +329,10 @@ public class JobApplicationService {
 
         jobApplication.setWithdrawn(true);
         jobApplicationRepository.save(jobApplication);
+        userRelationshipTagService.refreshPairFromLatestActive(
+            jobApplication.getCreator().getId(),
+            jobApplication.getPost().getCreator().getId()
+        );
 
         try {
             notificationService
