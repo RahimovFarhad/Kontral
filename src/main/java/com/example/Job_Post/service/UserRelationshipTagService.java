@@ -97,12 +97,13 @@ public class UserRelationshipTagService {
         if (status == null || applicantId == null || currentUserId == null) {
             return ChatRelationshipStatus.NONE;
         }
+        System.out.println("\n" + status + "\n");
 
         return switch (status) {
             case OFFERED -> currentUserId.equals(applicantId)
                 ? ChatRelationshipStatus.OFFER_RECEIVED_WAITING_RESPONSE
                 : ChatRelationshipStatus.OFFER_SENT_WAITING_RESPONSE;
-            case HIRED, JOB_COMPLETED -> currentUserId.equals(applicantId)
+            case HIRED -> currentUserId.equals(applicantId)
                 ? ChatRelationshipStatus.EMPLOYEE
                 : ChatRelationshipStatus.EMPLOYER;
             default -> ChatRelationshipStatus.NONE;
