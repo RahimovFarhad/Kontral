@@ -72,17 +72,13 @@ public class JobApplicationController {
         @PathVariable Integer applierId
     ){
         try {
-            System.out.println("Hey");
             ResponseEntity res = ResponseEntity.ok(jobApplicationService.getApplicationsByApplierId(applierId));
             return res;
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.badRequest().body("Unable to find user's applications: " + e.getMessage());
 
         }
     }
-
-
 
     @GetMapping("/get-applications-to-job/{jobId}")
     public ResponseEntity<?> getApplicationsToMyJob(
