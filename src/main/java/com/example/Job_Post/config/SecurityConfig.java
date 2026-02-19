@@ -84,6 +84,8 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/user/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/job-applications/user-applications/{applierId}").permitAll()
                 .requestMatchers("/health/**").permitAll()
                 .anyRequest().authenticated()
             )
