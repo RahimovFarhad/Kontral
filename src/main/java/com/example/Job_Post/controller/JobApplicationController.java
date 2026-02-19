@@ -65,6 +65,22 @@ public class JobApplicationController {
 
         }
     }
+    
+    @SuppressWarnings({  "rawtypes" })
+    @GetMapping("/user-applications/{applierId}")
+    public ResponseEntity<?> getHiredOrCompletedJobApplicationsByApplierId(
+        @PathVariable Integer applierId
+    ){
+        try {
+            ResponseEntity res = ResponseEntity.ok(jobApplicationService.getApplicationsByApplierId(applierId));
+            return res;
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Unable to find user's applications: " + e.getMessage());
+
+        }
+    }
+
+
 
     @GetMapping("/get-applications-to-job/{jobId}")
     public ResponseEntity<?> getApplicationsToMyJob(

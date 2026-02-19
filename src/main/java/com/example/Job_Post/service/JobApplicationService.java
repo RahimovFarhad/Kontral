@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.JobApplicationDTO;
 import com.example.Job_Post.dto.JobApplicationMapper;
+import com.example.Job_Post.dto.SafeJobApplicationDTO;
 import com.example.Job_Post.entity.ChatMessage;
 import com.example.Job_Post.entity.ChatNotification;
 import com.example.Job_Post.entity.JobApplication;
@@ -406,14 +407,19 @@ public class JobApplicationService {
         return jobApplication;
     }
 
-   
+    public List<SafeJobApplicationDTO> getApplicationsByApplierId(Integer applierId) {
+        if (applierId == null) 
+            throw new IllegalArgumentException("ID must not be null");
+        User user = userService.getUserById(applierId);
+
+        if (user == null)
+            throw new IllegalArgumentException("User must not be null");
 
 
-
-
-
-    
-
-
+        return jobApplicationRepository.findByCreatorAndStatusIn(
+            user, 
+            List.of(JobApplicationStatus.HIRED, JobApplicationStatus.JOB_COMPLETED)
+        ).stream().map(application -> jobApplicationMapper.toSafeDTO(application)).toList();
+    }
     
 }

@@ -61,5 +61,23 @@ public class JobApplicationMapper {
                 .finalSalary(jobApplication.getFinalSalary())
                 .build();
     }
+
+    public SafeJobApplicationDTO toSafeDTO(JobApplication jobApplication) {
+        if (jobApplication == null) {
+            return null;
+        }
+        return SafeJobApplicationDTO.builder()
+                .id(jobApplication.getId())
+                .postDTO(postMapper.toDTO(jobApplication.getPost()))
+                .creatorDTO(userMapper.toDTO(jobApplication.getCreator()))
+                .status(jobApplication.getStatus() != null ? 
+                        jobApplication.getStatus() : null)
+                .firstName(jobApplication.getFirstName())
+                .lastName(jobApplication.getLastName())
+                .email(jobApplication.getEmail())
+                .location(jobApplication.getLocation())
+                .build();
+            
+    }
     
 }

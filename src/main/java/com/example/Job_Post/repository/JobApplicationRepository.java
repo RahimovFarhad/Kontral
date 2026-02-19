@@ -12,10 +12,13 @@ import org.springframework.data.repository.query.Param;
 import com.example.Job_Post.entity.JobApplication;
 import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.JobApplicationStatus;
 
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Integer> {
     List<JobApplication> findByCreatorAndIsWithdrawnFalse(User creator);
+
+    List<JobApplication> findByCreatorAndStatusIn(User creator, List<JobApplicationStatus> statuses);
 
     Page<JobApplication> findByPostAndIsWithdrawnFalse(Post post, Pageable pageable);
 

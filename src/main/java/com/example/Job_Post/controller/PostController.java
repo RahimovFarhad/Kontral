@@ -100,11 +100,25 @@ public class PostController {
         try {            
             Page<PostDTO> page = postService.getMyPosts(pageable).map(post -> postMapper.toDTO(post));
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-            
             return ResponseEntity.ok(response);   
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Cannot get your posts: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("user/{userId}")
+    public ResponseEntity<?> getPostsByCreatorId(
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable,
+            @PathVariable Integer userId
+    ) {
+        try {            
+            Page<PostDTO> page = postService.getPostsByCreatorId(userId, pageable).map(post -> postMapper.toDTO(post));
+            PagedResponse<PostDTO> response = PagedResponse.formPage(page);
+            return ResponseEntity.ok(response);   
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Cannot get posts of user " + userId + ":" + e.getMessage());
         }
     }
 
