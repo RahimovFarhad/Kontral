@@ -177,7 +177,9 @@ public class NotificationService {
         }
 
         return switch (notificationType) {
-            case ACCEPT_OFFER -> "OFFER_ACCEPTED";
+            case APPLY -> "APPLY_JOB";
+            case OFFER -> "OFFER_JOB";
+            case ACCEPT_OFFER -> "OFFER_ACCEPT";
             default -> notificationType.name();
         };
     }
