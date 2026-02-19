@@ -117,7 +117,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (
                 path != null && (
                 (request.getMethod().equals("GET") && path.equals("/api/v1/posts/all")) ||
-                (request.getMethod().equals("GET") && path.startsWith("/api/v1/posts/"))
+                (request.getMethod().equals("GET") && path.startsWith("/api/v1/posts/")) ||
+                (request.getMethod().equals("GET") && path.startsWith("/api/v1/job-applications/user-applications/")) 
+
                 )
             ){
                 System.out.println("Public access to posts endpoint: " + path);

@@ -104,8 +104,8 @@ public class UserRelationshipTagService {
                 ? ChatRelationshipStatus.OFFER_RECEIVED_WAITING_RESPONSE
                 : ChatRelationshipStatus.OFFER_SENT_WAITING_RESPONSE;
             case HIRED -> currentUserId.equals(applicantId)
-                ? ChatRelationshipStatus.EMPLOYEE
-                : ChatRelationshipStatus.EMPLOYER;
+                ? ChatRelationshipStatus.EMPLOYER
+                : ChatRelationshipStatus.EMPLOYEE;
             default -> ChatRelationshipStatus.NONE;
         };
     }
