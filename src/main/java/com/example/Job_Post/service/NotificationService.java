@@ -1,6 +1,7 @@
 package com.example.Job_Post.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,12 +9,15 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.component.CurrentUser;
+import com.example.Job_Post.dto.LatestUnreadActionNotificationDTO;
 import com.example.Job_Post.dto.NotificationDTO;
 import com.example.Job_Post.dto.NotificationMapper;
+import com.example.Job_Post.entity.JobApplication;
 import com.example.Job_Post.entity.Notification;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.NotificationType;
 import com.example.Job_Post.enumerator.SubjectType;
+import com.example.Job_Post.repository.JobApplicationRepository;
 import com.example.Job_Post.repository.NotificationRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,6 +31,7 @@ public class NotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationMapper notificationMapper;
+    private final JobApplicationRepository jobApplicationRepository;
 
     private final CurrentUser cUser;
 
@@ -119,6 +124,62 @@ public class NotificationService {
     public int setNotificationsReadBatch(User user, List<Integer> notificationIds) {
         if (notificationIds == null || notificationIds.isEmpty()) return 0;
         return notificationRepository.markAsReadByUserIdAndIds(user.getId(), notificationIds);
+    }
+
+    public LatestUnreadActionNotificationDTO getLatestUnreadActionNotificationForUser(Integer userId) {
+        Optional<Notification> latest = notificationRepository
+            .findTopByNotifiedUserIdAndIsReadFalseAndNotificationTypeInOrderByCreatedAtDescIdDesc(
+                userId,
+                List.of(NotificationType.APPLY, NotificationType.OFFER, NotificationType.ACCEPT_OFFER)
+            );
+
+        if (latest.isEmpty()) {
+            return null;
+        }
+
+        Notification notification = latest.get();
+        Integer chatUserId = resolveChatUserId(notification, userId);
+
+        return LatestUnreadActionNotificationDTO.builder()
+            .id(notification.getId())
+            .notificationType(toPopupNotificationType(notification.getNotificationType()))
+            .chatUserId(chatUserId)
+            .read(notification.isRead())
+            .createdAt(notification.getCreatedAt())
+            .content(notification.getContent())
+            .build();
+    }
+
+    private Integer resolveChatUserId(Notification notification, Integer currentUserId) {
+        if (notification.getSubjectType() != SubjectType.JOB_APPLICATION || notification.getSubjectId() == null) {
+            return null;
+        }
+
+        Optional<JobApplication> jobApplicationOpt = jobApplicationRepository.findById(notification.getSubjectId());
+        if (jobApplicationOpt.isEmpty()) {
+            return null;
+        }
+
+        JobApplication jobApplication = jobApplicationOpt.get();
+        Integer applicantId = jobApplication.getCreator().getId();
+        Integer employerId = jobApplication.getPost().getCreator().getId();
+
+        if (currentUserId == null) {
+            return null;
+        }
+
+        return currentUserId.equals(applicantId) ? employerId : applicantId;
+    }
+
+    private String toPopupNotificationType(NotificationType notificationType) {
+        if (notificationType == null) {
+            return null;
+        }
+
+        return switch (notificationType) {
+            case ACCEPT_OFFER -> "OFFER_ACCEPTED";
+            default -> notificationType.name();
+        };
     }
     
 }

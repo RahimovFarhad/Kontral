@@ -1,6 +1,7 @@
 package com.example.Job_Post.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.Job_Post.entity.Notification;
+import com.example.Job_Post.enumerator.NotificationType;
 
 
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
@@ -19,6 +21,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
 
     Page<Notification> findByNotifiedUserId(Integer userId, Pageable pageable); 
     Integer countByNotifiedUserIdAndIsReadFalse(Integer userId);    
+    Optional<Notification> findTopByNotifiedUserIdAndIsReadFalseAndNotificationTypeInOrderByCreatedAtDescIdDesc(
+        Integer userId,
+        List<NotificationType> notificationTypes
+    );
 
 
     @Modifying

@@ -36,6 +36,7 @@ public class UserDTO {
 
     private Integer newNotificationCount;
     private Integer newChatMessageCount;
+    private LatestUnreadActionNotificationDTO latestUnreadActionNotification;
 
     private String linkedIn;
     

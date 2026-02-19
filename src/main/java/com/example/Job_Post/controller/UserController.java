@@ -31,6 +31,7 @@ import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.AuthMethod;
 import com.example.Job_Post.service.AuthenticationService;
 import com.example.Job_Post.service.FileUploadService;
+import com.example.Job_Post.service.NotificationService;
 import com.example.Job_Post.service.RegisterService;
 import com.example.Job_Post.service.UserService;
 
@@ -53,6 +54,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     private final FileUploadService fileUploadService;
+    private final NotificationService notificationService;
 
     @Value("${FRONTEND_URL}")
     private String frontendUrl;
@@ -278,6 +280,9 @@ public class UserController {
     public ResponseEntity<?> getMyUser(Principal principal) {
         try {
             UserDTO user = userMapper.toDTO(userService.getUserByEmail(principal.getName()));
+            user.setLatestUnreadActionNotification(
+                notificationService.getLatestUnreadActionNotificationForUser(user.getId())
+            );
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             e.printStackTrace();
