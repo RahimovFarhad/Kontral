@@ -160,7 +160,7 @@ public class UserService {
         Set<Integer> sendersWithUnread =
             chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
 
-        List<ChatUserDTO> users = chatRoomRepository.findByUser1_IdOrUser2_IdOrderByLastMessageAtDesc(currentUser.getId(), currentUser.getId())
+        List<ChatUserDTO> users = chatRoomRepository.findVisibleChatRoomsForUser(currentUser.getId())
                 .stream()
                 .map( (ChatRoom chatRoom) -> {
                     User otherUser = chatRoom.getUser1().getId().equals(currentUser.getId())

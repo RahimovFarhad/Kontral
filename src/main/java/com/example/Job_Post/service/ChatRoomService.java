@@ -1,5 +1,6 @@
 package com.example.Job_Post.service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.ChatRoomRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -69,6 +71,25 @@ public class ChatRoomService {
         return chatRoomRepository.save(senderRecipient);
     }
 
-    
-    
+    @Transactional
+    public void deleteChatForUser(Integer currentUserId, Integer otherUserId) {
+        if (currentUserId == null || otherUserId == null) {
+            throw new IllegalArgumentException("Current user ID and other user ID must not be null");
+        }
+
+        ChatRoom chatRoom = getChatRoom(currentUserId, otherUserId, false)
+            .orElseThrow(() -> new IllegalStateException("Chat room not found"));
+
+        Instant now = Instant.now();
+
+        if (chatRoom.getUser1() != null && currentUserId.equals(chatRoom.getUser1().getId())) {
+            chatRoom.setUser1DeletedAt(now);
+        } else if (chatRoom.getUser2() != null && currentUserId.equals(chatRoom.getUser2().getId())) {
+            chatRoom.setUser2DeletedAt(now);
+        } else {
+            throw new IllegalStateException("Current user is not part of this chat room");
+        }
+
+        chatRoomRepository.save(chatRoom);
+    }
 }

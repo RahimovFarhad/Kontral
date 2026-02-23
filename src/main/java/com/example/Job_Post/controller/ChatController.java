@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import com.example.Job_Post.entity.ChatNotification;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.UserRepository;
 import com.example.Job_Post.service.ChatMessageService;
+import com.example.Job_Post.service.ChatRoomService;
 import com.example.Job_Post.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class ChatController {
     private final ChatMessageMapper chatMessageMapper;
 
     private final ChatMessageService chatMessageService;
+    private final ChatRoomService chatRoomService;
     private final UserRepository userRepository;
 
     @MessageMapping("/read")
@@ -130,6 +133,22 @@ public class ChatController {
             return ResponseEntity.badRequest().body("Failed to retrieve messages: " + e.getMessage());
         }
 
+    }
+
+    @DeleteMapping("/{otherUserId}")
+    public ResponseEntity<?> deleteChat(@PathVariable Integer otherUserId, Principal principal) {
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("User not authenticated");
+            }
+
+            User currentUser = userService.getUserByEmail(principal.getName());
+            chatRoomService.deleteChatForUser(currentUser.getId(), otherUserId);
+
+            return ResponseEntity.ok("Chat deleted for current user");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to delete chat: " + e.getMessage());
+        }
     }
 
 }

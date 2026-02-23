@@ -22,7 +22,15 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Integer> {
 
     Optional<ChatRoom> findByChatId(String chatId);
 
-    List<ChatRoom> findByUser1_IdOrUser2_IdOrderByLastMessageAtDesc(Integer userId1, Integer userId2);
+    @Query("""
+        SELECT c FROM ChatRoom c
+        WHERE
+            (c.user1.id = :userId AND (c.user1DeletedAt IS NULL OR c.lastMessageAt > c.user1DeletedAt))
+            OR
+            (c.user2.id = :userId AND (c.user2DeletedAt IS NULL OR c.lastMessageAt > c.user2DeletedAt))
+        ORDER BY c.lastMessageAt DESC
+    """)
+    List<ChatRoom> findVisibleChatRoomsForUser(@Param("userId") Integer userId);
 
     
 

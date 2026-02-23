@@ -39,4 +39,8 @@ public class ChatRoom {
 
     @Builder.Default
     private Instant lastMessageAt = Instant.now();
+
+    private Instant user1DeletedAt;
+
+    private Instant user2DeletedAt;
 }
