@@ -73,6 +73,7 @@ public class SecurityConfig {
                     "/api/v1/user/forgot-password",
                     "/api/v1/user/reset-password",
                     "/api/v1/user/validate-reset-token",
+                    "/api/v1/user/nickname-available",
                     "/api/v1/user/profile/*",
                     "/api/v1/auth/refresh",
                     "/api/v1/terminate/logout",

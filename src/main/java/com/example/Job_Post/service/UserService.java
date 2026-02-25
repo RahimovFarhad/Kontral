@@ -128,6 +128,22 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public boolean isNickNameTaken(String nickName) {
+        if (nickName == null || nickName.trim().isEmpty()) {
+            return false;
+        }
+
+        return userRepository.existsByNickNameIgnoreCase(nickName.trim());
+    }
+
+    public boolean isNickNameTakenByAnotherUser(String nickName, Integer currentUserId) {
+        if (nickName == null || nickName.trim().isEmpty()) {
+            return false;
+        }
+
+        return userRepository.existsByNickNameIgnoreCaseAndIdNot(nickName.trim(), currentUserId);
+    }
+
     public List<ChatUserDTO> getChatUsers() {
         User currentUser = cUser.get();
 

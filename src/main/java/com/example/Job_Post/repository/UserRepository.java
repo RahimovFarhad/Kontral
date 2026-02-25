@@ -39,6 +39,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Boolean existsByEmail(String email);
     Boolean existsByPhoneNumber(String phoneNumber);
+    Boolean existsByNickNameIgnoreCase(String nickName);
+    Boolean existsByNickNameIgnoreCaseAndIdNot(String nickName, Integer id);
 
     @Query("SELECT u FROM User u WHERE u.verified = true")
     List<User> findAll();

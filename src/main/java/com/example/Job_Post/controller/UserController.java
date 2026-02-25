@@ -3,6 +3,7 @@ package com.example.Job_Post.controller;
 
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -221,6 +222,13 @@ public class UserController {
     public ResponseEntity<?> updateMyUser(@RequestBody UserDTO userDTO, Principal principal) {
         try {
             User user = userService.getUserByEmail(principal.getName());
+
+            String nickName = userDTO.getNickName() != null ? userDTO.getNickName().trim() : null;
+            userDTO.setNickName(nickName);
+            if (nickName != null && !nickName.isEmpty() && userService.isNickNameTakenByAnotherUser(nickName, user.getId())) {
+                return ResponseEntity.badRequest().body("Nickname is already taken.");
+            }
+
             User userUpdated = UserMapper.updateEntityFromDTO(userDTO, user);
             
             userService.save(userUpdated);
@@ -228,6 +236,17 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to update user: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/nickname-available")
+    public ResponseEntity<?> checkNicknameAvailability(@RequestParam("nickname") String nickname) {
+        String trimmedNickname = nickname != null ? nickname.trim() : null;
+        if (trimmedNickname == null || trimmedNickname.isEmpty()) {
+            return ResponseEntity.badRequest().body("Nickname is required.");
+        }
+
+        boolean isTaken = userService.isNickNameTaken(trimmedNickname);
+        return ResponseEntity.ok(Map.of("available", !isTaken));
     }
 
     @GetMapping("profile/{id}")
