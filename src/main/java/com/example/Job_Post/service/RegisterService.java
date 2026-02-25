@@ -178,7 +178,7 @@ public class RegisterService {
         else if (!updatesToCustom && !existsByEmail && !existsByPhoneNumber) {
             user = User.builder()
                                 .nickName(null) // Nickname can be set later")
-                                .updated_at(Instant.now()) // Assuming you have an updated_at field in User
+                                .updated_at(null)
                                 .phoneNumber(request.getPhoneNumber())
                                 .email(request.getEmail())
                                 .role(Role.USER) // Assuming Role is an enum with USER as one of the values
@@ -286,5 +286,4 @@ public class RegisterService {
 
     
 }
-
 

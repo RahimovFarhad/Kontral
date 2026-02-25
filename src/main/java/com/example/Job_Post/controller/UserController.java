@@ -279,10 +279,16 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getMyUser(Principal principal) {
         try {
-            UserDTO user = userMapper.toDTO(userService.getUserByEmail(principal.getName()));
+            User userEntity = userService.getUserByEmail(principal.getName());
+            UserDTO user = userMapper.toDTO(userEntity);
             user.setLatestUnreadActionNotification(
                 notificationService.getLatestUnreadActionNotificationForUser(user.getId())
             );
+
+            if (Boolean.TRUE.equals(user.getIsFirstTimeAccessing())) {
+                userEntity.setUpdated_at(userEntity.getCreated_at());
+                userService.save(userEntity);
+            }
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             e.printStackTrace();

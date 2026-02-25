@@ -51,6 +51,8 @@ public class UserMapper {
         userDTO.setNewNotificationCount(notificationRepository.countByNotifiedUserIdAndIsReadFalse(user.getId()));
         userDTO.setNewChatMessageCount(chatMessageRepository.countByRecipientIdAndIsReadFalse(user.getId()));
         userDTO.setLinkedIn(user.getLinkedIn());
+        userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        userDTO.setIsAccountComplete(isAccountComplete(user));
 
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
@@ -142,6 +144,21 @@ public class UserMapper {
         return user;
     }
 
+    private boolean isFirstTimeAccessing(User user) {
+        return user.getUpdated_at() == null;
+    }
+
+    private boolean isAccountComplete(User user) {
+        return !isBlank(user.getNickName())
+            && !isBlank(user.getEmail())
+            && !isBlank(user.getFirstName())
+            && !isBlank(user.getLastName());
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     public static User updateEntityFromDTO(UserDTO userDTO, User user) {
         if (userDTO == null || user == null) {
             throw new IllegalArgumentException("UserDTO and User cannot be null");
@@ -157,5 +174,4 @@ public class UserMapper {
     }
     
 }
-
 

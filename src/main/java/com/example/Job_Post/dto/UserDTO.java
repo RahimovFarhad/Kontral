@@ -42,5 +42,7 @@ public class UserDTO {
     
     @Builder.Default
     private Boolean isCompany = false;
+    private Boolean isFirstTimeAccessing;
+    private Boolean isAccountComplete;
 
 }
