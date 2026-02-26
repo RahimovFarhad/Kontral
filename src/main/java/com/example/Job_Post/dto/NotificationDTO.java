@@ -15,7 +15,7 @@ public class NotificationDTO {
     private UserDTO notifiedUserDTO; // ID of the creator applying for the job
     private String notificationType; // ID of the job post being applied for
 
-    private Integer subjectId; // Status of the application (e.g., "Pending", "Accepted", "Rejected")
+    private Integer subjectId; 
     private String subjectType;
 
     private String content;
