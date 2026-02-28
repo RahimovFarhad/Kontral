@@ -1,6 +1,7 @@
 package com.example.Job_Post.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,7 @@ public class PostDTO {
     
     private Instant applicationDeadline;
     private Instant postedTime;
+    private List<String> imageUrls;
 
     // Additional fields can be added as needed
     private Boolean isSavedByCurrentUser;

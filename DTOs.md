@@ -100,8 +100,17 @@ Source folder: `src/main/java/com/example/Job_Post/dto`
 - `responsibilities: String`
 - `applicationDeadline: Instant`
 - `postedTime: Instant`
+- `imageUrls: List<String>`
 - `isSavedByCurrentUser: Boolean`
 - `applicationCount: Integer`
+
+### Post Creation Request Notes
+- `POST /api/v1/posts/create` still accepts `application/json` for posts without images.
+- `POST /api/v1/posts/create` also accepts `multipart/form-data` for posts with images.
+- In multipart requests, send:
+- `post`: JSON payload matching `PostDTO`
+- `images`: repeated file parts (up to 5 images)
+- On success, the response is `PostDTO`, including `imageUrls`.
 
 ## ReviewDTO
 - `id: Integer`

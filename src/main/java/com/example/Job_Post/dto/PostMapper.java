@@ -1,6 +1,8 @@
 package com.example.Job_Post.dto;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -73,6 +75,9 @@ public class PostMapper {
                 .responsibilities(post.getResponsibilities())
                 .applicationDeadline(post.getApplicationDeadline())
                 .postedTime(post.getCreatedAt())
+                .imageUrls(post.getImages() == null ? Collections.emptyList() : post.getImages().stream()
+                        .map(postImage -> postImage.getImageUrl())
+                        .collect(Collectors.toList()))
                 .isSavedByCurrentUser(false)
                 .applicationCount(post.getApplications() != null ? post.getApplications().size() : 0)
                 .isNegotiable(post.getIsNegotiable())

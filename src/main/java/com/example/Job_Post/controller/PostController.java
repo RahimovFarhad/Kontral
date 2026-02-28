@@ -1,10 +1,12 @@
 package com.example.Job_Post.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Job_Post.dto.PagedResponse;
 import com.example.Job_Post.dto.PostDTO;
@@ -32,7 +36,7 @@ public class PostController {
 
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> createPost(@RequestBody PostDTO request) {
         try {
             ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.create(request)));
@@ -43,6 +47,21 @@ public class PostController {
         }
 
 
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createPostWithImages(
+            @RequestPart("post") PostDTO request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) {
+        try {
+            ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.create(request, images)));
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Post creation failed: " + e.getMessage());
+        }
     }
 
     @SuppressWarnings("unchecked")

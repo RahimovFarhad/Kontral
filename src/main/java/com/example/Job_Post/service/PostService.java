@@ -1,6 +1,9 @@
 package com.example.Job_Post.service;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,11 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.PostDTO;
 import com.example.Job_Post.dto.PostMapper;
 import com.example.Job_Post.entity.Post;
+import com.example.Job_Post.entity.PostImages;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.NotificationType;
 import com.example.Job_Post.enumerator.SubjectType;
@@ -33,12 +38,18 @@ public class PostService {
     private final PostMapper postMapper;
     private final SavedPostRepository savedPostRepository;
     private final JobApplicationRepository jobApplicationRepository;
+    private final FileUploadService fileUploadService;
 
     private final NotificationService notificationService;
 
     private final CurrentUser cUser;
 
     public Post create(PostDTO post) {
+        return create(post, null);
+    }
+
+    @Transactional
+    public Post create(PostDTO post, List<MultipartFile> images) {
         System.out.println("Received post data: " + post);
         Post newPost = postMapper.toEntity(post);
  
@@ -53,9 +64,13 @@ public class PostService {
             newPost.setSalaryRangeLower(post.getSalary());
             newPost.setSalaryRangeUpper(post.getSalary());
         }
+
+        validateImages(images);
         
         System.out.println("Creating post: " + newPost);
-        return postRepository.save(newPost);
+        Post savedPost = postRepository.save(newPost);
+        attachImages(savedPost, images);
+        return postRepository.save(savedPost);
     }
 
     public Post edit(PostDTO request) {
@@ -191,5 +206,48 @@ public class PostService {
         User currentUser = cUser.get();
         return getPostsByCreatorId(currentUser.getId(), pageable);
     } 
+
+    private void validateImages(List<MultipartFile> images) {
+        if (images == null) {
+            return;
+        }
+
+        long nonEmptyImageCount = images.stream()
+                .filter(image -> image != null && !image.isEmpty())
+                .count();
+
+        if (nonEmptyImageCount > 5) {
+            throw new IllegalArgumentException("A post can have at most 5 images.");
+        }
+    }
+
+    private void attachImages(Post post, List<MultipartFile> images) {
+        if (images == null) {
+            return;
+        }
+
+        List<PostImages> uploadedImages = new ArrayList<>();
+
+        for (MultipartFile image : images) {
+            if (image == null || image.isEmpty()) {
+                continue;
+            }
+
+            try {
+                String fileName = FileUploadService.generateFileName("post", post.getId(), "image");
+                String imageUrl = fileUploadService.upload(image, fileName, "image");
+
+                uploadedImages.add(PostImages.builder()
+                        .post(post)
+                        .imageUrl(imageUrl)
+                        .createdAt(Instant.now())
+                        .build());
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to upload one of the post images.", e);
+            }
+        }
+
+        post.setImages(uploadedImages);
+    }
     
 }
