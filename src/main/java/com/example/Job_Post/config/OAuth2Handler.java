@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.auth.AuthenticationResponse;
 import com.example.Job_Post.auth.RegisterRequest;
+import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.UserRepository;
+import com.example.Job_Post.service.RefreshTokenService;
 import com.example.Job_Post.service.RegisterService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.example.Job_Post.enumerator.AuthMethod;
-import com.example.Job_Post.enumerator.TokenType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ public class OAuth2Handler {
     private final RegisterService registerService;
 
     private final UserRepository userRepository;
+    private final RefreshTokenService refreshTokenService;
 
 
     public void generateJwtForOAuth2User(Authentication authentication, HttpServletResponse response) {
@@ -43,7 +45,9 @@ public class OAuth2Handler {
 
         if (userRepository.existsByEmail(email)) {
             // User already exists, generate token
-            String refreshToken = JwtService.generateTokenByEmail(email, TokenType.REFRESH);
+            User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+            String refreshToken = refreshTokenService.createRefreshToken(user);
 
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)

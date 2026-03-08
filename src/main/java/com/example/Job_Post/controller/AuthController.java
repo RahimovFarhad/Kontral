@@ -1,10 +1,10 @@
 package com.example.Job_Post.controller;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Job_Post.config.JwtService;
+import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.TokenType;
+import com.example.Job_Post.service.RefreshTokenService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    private final RefreshTokenService refreshTokenService;
+
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken() {
         // If the request reaches here, token is valid
@@ -46,30 +50,17 @@ public class AuthController {
                 return ResponseEntity.status(401).body("Missing refresh token");
             }
 
-            if (!JwtService.isTokenSignatureValid(refreshToken)) {
-                return ResponseEntity.status(401).body("Invalid signature");
-            }
+            User user = refreshTokenService.consumeRefreshToken(refreshToken);
+            String newAccess = JwtService.generateTokenByEmail(user.getEmail(), TokenType.ACCESS);
+            String newRefresh = refreshTokenService.createRefreshToken(user);
 
-            if (JwtService.extractExpiration(refreshToken).before(new Date())) {
-                return ResponseEntity.status(401).body("Token expired");
-            }
-
-            if (!JwtService.isRefreshToken(refreshToken)) {
-                return ResponseEntity.status(401).body("Not a refresh token");
-            }
-
-            String email = JwtService.extractUsername(refreshToken);
-
-            // No DB lookup needed!
-
-            String newAccess = JwtService.generateTokenByEmail(email, TokenType.ACCESS);
-            String newRefresh = JwtService.generateTokenByEmail(email, TokenType.REFRESH);
-
-            Cookie cookie = new Cookie("refreshToken", newRefresh);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setPath("/");
-            cookie.setMaxAge(7 * 24 * 60 * 60);
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefresh)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
 
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -77,7 +68,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", newAccess));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Cannot refresh");
+            return ResponseEntity.status(401).body("Cannot refresh: " + e.getMessage());
         }
     }
 

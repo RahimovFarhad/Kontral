@@ -22,44 +22,64 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class JwtService {
 
-    private static SecretKey SIGNING_KEY;
+    private static SecretKey ACCESS_SIGNING_KEY;
+    private static SecretKey REFRESH_SIGNING_KEY;
 
     @Value("${SECRET_KEY}")
-    private String secret;
+    private String accessSecret;
+
+    @Value("${REFRESH_SECRET_KEY}")
+    private String refreshSecret;
 
     @PostConstruct
     public void init() {
-        if (secret == null || secret.isBlank()) {
+        if (accessSecret == null || accessSecret.isBlank()) {
             throw new IllegalStateException("SECRET_KEY env var is missing");
         }
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        SIGNING_KEY = Keys.hmacShaKeyFor(keyBytes);
+
+        if (refreshSecret == null || refreshSecret.isBlank()) {
+            throw new IllegalStateException("REFRESH_SECRET_KEY env var is missing");
+        }
+
+        byte[] accessKeyBytes = Decoders.BASE64.decode(accessSecret);
+        byte[] refreshKeyBytes = Decoders.BASE64.decode(refreshSecret);
+
+        ACCESS_SIGNING_KEY = Keys.hmacShaKeyFor(accessKeyBytes);
+        REFRESH_SIGNING_KEY = Keys.hmacShaKeyFor(refreshKeyBytes);
     }
 
     public static String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractUsername(token, TokenType.ACCESS);
+    }
+
+    public static String extractUsername(String token, TokenType tokenType) {
+        return extractClaim(token, tokenType, Claims::getSubject);
     }
 
     public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+        return extractClaim(token, TokenType.ACCESS, claimsResolver);
+    }
+
+    public static <T> T extractClaim(String token, TokenType tokenType, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token, tokenType);
         return claimsResolver.apply(claims);
     }
 
-    private static Claims extractAllClaims(String token) {
+    private static Claims extractAllClaims(String token, TokenType tokenType) {
         if (token == null || token.trim().isEmpty()) {
             throw new IllegalArgumentException("❌ JWT is null or empty before parsing.");
         }
 
         return Jwts
             .parser()
-            .verifyWith(getSignInKey())
+            .verifyWith(getSignInKey(tokenType))
             .build()
             .parseSignedClaims(token)
             .getPayload();
     }
 
-    private static SecretKey getSignInKey() {
-        return SIGNING_KEY;
+    private static SecretKey getSignInKey(TokenType tokenType) {
+        return tokenType == TokenType.REFRESH ? REFRESH_SIGNING_KEY : ACCESS_SIGNING_KEY;
     }
 
     public static boolean isTokenValid(String token, UserDetails userDetails) {
@@ -72,7 +92,11 @@ public class JwtService {
     }
 
     public static Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return extractExpiration(token, TokenType.ACCESS);
+    }
+
+    public static Date extractExpiration(String token, TokenType tokenType) {
+        return extractClaim(token, tokenType, Claims::getExpiration);
     }
 
     public static String generateToken(User user, TokenType tokenType) {
@@ -89,11 +113,11 @@ public class JwtService {
 
         return Jwts
             .builder()
+            .claims(extraClaims)
             .subject(user.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(new Date(System.currentTimeMillis() + time))
-            .signWith(getSignInKey())
-            .claims(extraClaims)
+            .signWith(getSignInKey(tokenType))
             .compact();
     }
 
@@ -106,17 +130,17 @@ public class JwtService {
                 : 1000 * 60 * 10;
 
         return Jwts.builder()
+            .claims(claims)
             .subject(email)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + time))
-            .claims(claims)
-            .signWith(getSignInKey())
+            .signWith(getSignInKey(tokenType))
             .compact();
     }
 
     public static boolean isRefreshToken(String token) {
         try {
-            String type = extractClaim(token, c -> c.get("type", String.class));
+            String type = extractClaim(token, TokenType.REFRESH, c -> c.get("type", String.class));
             return "refresh".equals(type);
         } catch (Exception e) {
             return false;
@@ -124,8 +148,12 @@ public class JwtService {
     }
 
     public static boolean isTokenSignatureValid(String token) {
+        return isTokenSignatureValid(token, TokenType.ACCESS);
+    }
+
+    public static boolean isTokenSignatureValid(String token, TokenType tokenType) {
         try {
-            extractAllClaims(token);
+            extractAllClaims(token, tokenType);
             return true;
         } catch (Exception e) {
             return false;
@@ -133,9 +161,9 @@ public class JwtService {
     }
 
     public static boolean isRefreshTokenValid(String token) {
-        return isTokenSignatureValid(token)
+        return isTokenSignatureValid(token, TokenType.REFRESH)
             && isRefreshToken(token)
-            && !isTokenExpired(token);
+            && !extractExpiration(token, TokenType.REFRESH).before(new Date());
     }
 
 }

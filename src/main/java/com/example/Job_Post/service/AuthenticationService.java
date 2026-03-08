@@ -37,6 +37,7 @@ public class AuthenticationService {
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
 
     private static final int verificationTokenByteLength = 32;
@@ -74,7 +75,7 @@ public class AuthenticationService {
             throw new AccessDeniedException("This account is not verified!");
         }
         
-        String refreshToken = JwtService.generateToken(user, TokenType.REFRESH);
+        String refreshToken = refreshTokenService.createRefreshToken(user);
         String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
@@ -107,6 +108,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(normalizedEmail)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + normalizedEmail));
 
+        refreshTokenService.revokeAllByUserEmail(normalizedEmail);
         userRepository.delete(user);
         return "User deleted successfully";
     }
@@ -115,5 +117,4 @@ public class AuthenticationService {
 
     
 }
-
 
