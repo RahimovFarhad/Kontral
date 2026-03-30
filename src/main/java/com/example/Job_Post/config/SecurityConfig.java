@@ -56,6 +56,7 @@ public class SecurityConfig {
                     "/browse/**",
                     "/signup",
                     "/post",
+                    "/post/service-offer",
                     "/profile/**",
                     "/chat/**",
                     "/notifications",
