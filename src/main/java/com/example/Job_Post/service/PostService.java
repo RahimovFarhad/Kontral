@@ -59,17 +59,22 @@ public class PostService {
     private final CurrentUser cUser;
 
     public Post create(PostDTO post) {
-        return create(post, null);
+        return create(post, null, PostType.JOB_REQUEST);
     }
 
     @Transactional
     public Post create(PostDTO post, List<MultipartFile> images) {
+        return create(post, images, PostType.JOB_REQUEST);
+    }
+
+    @Transactional
+    public Post create(PostDTO post, List<MultipartFile> images, PostType enforcedPostType) {
         System.out.println("Received post data: " + post);
         Post newPost = postMapper.toEntity(post);
  
         newPost.setCreator(cUser.get());
         newPost.setCreatedAt(Instant.now());
-        newPost.setPostType(resolvePostType(post.getPostType()));
+        newPost.setPostType(resolvePostType(enforcedPostType));
 
         if (post.getSalary() == null && (post.getSalaryRangeLower() == null || post.getSalaryRangeUpper() == null)) {
             throw new IllegalArgumentException("Either salary or both salary range bounds must be provided.");
@@ -89,11 +94,16 @@ public class PostService {
     }
 
     public Post edit(PostDTO request) {
+        return edit(request, PostType.JOB_REQUEST);
+    }
+
+    public Post edit(PostDTO request, PostType expectedPostType) {
         User currentUser = cUser.get();
 
 
         Post post = postRepository.findById(request.getId()).
                         orElseThrow(() -> new EntityNotFoundException("This Post does not exist"));
+        ensurePostType(post, expectedPostType);
 
         if (!post.getCreator().getId().equals(currentUser.getId())) {
             throw new IllegalAccessError("This post does not belong to current user!");
@@ -114,7 +124,7 @@ public class PostService {
         post.setLocation(request.getLocation());
         post.setEmploymentType(request.getEmploymentType());
         post.setJobCategory(request.getCategory());
-        post.setPostType(request.getPostType() != null ? request.getPostType() : resolvePostType(post.getPostType()));
+        post.setPostType(resolvePostType(expectedPostType));
         post.setSalary(request.getSalary());
         post.setSalaryRangeLower(request.getSalaryRangeLower());
         post.setSalaryRangeUpper(request.getSalaryRangeUpper());
@@ -159,11 +169,16 @@ public class PostService {
     }
 
     public String deletePostById(Integer id) {
+        return deletePostById(id, PostType.JOB_REQUEST);
+    }
+
+    public String deletePostById(Integer id, PostType expectedPostType) {
         User currentUser = cUser.get();
 
 
         Post post = postRepository.findById(id).
                         orElseThrow(() -> new EntityNotFoundException("This Post does not exist"));
+        ensurePostType(post, expectedPostType);
 
         if (!post.getCreator().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("This post does not belong to current user!");
@@ -210,11 +225,17 @@ public class PostService {
     }
 
     public Post getPostById(Integer id){
+        return getPostById(id, PostType.JOB_REQUEST);
+    }
+
+    public Post getPostById(Integer id, PostType expectedPostType){
         if (id == null) {
             throw new IllegalArgumentException("Post id cannot be null");
         }
-        return postRepository.findById(id).
+        Post post = postRepository.findById(id).
             orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+        ensurePostType(post, expectedPostType);
+        return post;
     }
 
     public Page<Post> getPostsByCreatorId(Integer userId, Pageable pageable){
@@ -372,6 +393,13 @@ public class PostService {
 
     private PostType resolvePostType(PostType postType) {
         return postType == null ? PostType.JOB_REQUEST : postType;
+    }
+
+    private void ensurePostType(Post post, PostType expectedPostType) {
+        PostType actualPostType = resolvePostType(post.getPostType());
+        if (actualPostType != expectedPostType) {
+            throw new IllegalArgumentException("Post does not belong to " + expectedPostType + " scope");
+        }
     }
     
 }

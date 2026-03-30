@@ -1,6 +1,5 @@
 package com.example.Job_Post.controller;
 
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -29,152 +28,119 @@ import com.example.Job_Post.service.PostService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/v1/service-posts")
 @RequiredArgsConstructor
-public class PostController {
+public class ServicePostController {
     private final PostService postService;
     private final PostMapper postMapper;
 
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createPost(@RequestBody PostDTO request) {
+    public ResponseEntity<String> createServicePost(@RequestBody PostDTO request) {
         try {
-            ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.create(request, null, PostType.JOB_REQUEST)));
+            ResponseEntity res = ResponseEntity.ok(
+                    postMapper.toDTO(postService.create(request, null, PostType.SERVICE_OFFER)));
             return res;
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Post creation failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Service post creation failed: " + e.getMessage());
         }
-
-
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createPostWithImages(
+    public ResponseEntity<String> createServicePostWithImages(
             @RequestPart("post") PostDTO request,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images
-    ) {
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
         try {
-            ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.create(request, images, PostType.JOB_REQUEST)));
+            ResponseEntity res = ResponseEntity.ok(
+                    postMapper.toDTO(postService.create(request, images, PostType.SERVICE_OFFER)));
             return res;
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Post creation failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Service post creation failed: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
     @PutMapping("/edit")
-    public ResponseEntity<String> editPost(@RequestBody PostDTO request){
+    public ResponseEntity<String> editServicePost(@RequestBody PostDTO request) {
         try {
             @SuppressWarnings("rawtypes")
-            ResponseEntity res = ResponseEntity.ok(postService.edit(request, PostType.JOB_REQUEST));
+            ResponseEntity res = ResponseEntity.ok(postService.edit(request, PostType.SERVICE_OFFER));
             return res;
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Post edit failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Service post edit failed: " + e.getMessage());
         }
     }
 
     @SuppressWarnings("unchecked")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePostById(@PathVariable Integer id){
+    public ResponseEntity<String> deleteServicePostById(@PathVariable Integer id) {
         try {
             @SuppressWarnings("rawtypes")
-            ResponseEntity res = ResponseEntity.ok(postService.deletePostById(id, PostType.JOB_REQUEST)); 
+            ResponseEntity res = ResponseEntity.ok(postService.deletePostById(id, PostType.SERVICE_OFFER));
             return res;
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Cannot delete post with id " + id + " : " + e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot delete service post with id " + id + " : " + e.getMessage());
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts(
+    public ResponseEntity<?> getAllServicePosts(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) String employmentType,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
-            @PageableDefault(size = 10) Pageable pageable,
-            Principal principal
-    ) {
-        try {            
+            @PageableDefault(size = 10) Pageable pageable) {
+        try {
             Page<PostDTO> page = postService.getAllPosts(
-                search, category, minPrice, employmentType, PostType.JOB_REQUEST.toString(), sortBy, pageable
-            );
-            
+                    search, category, minPrice, employmentType, PostType.SERVICE_OFFER.toString(), sortBy, pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Cannot get posts: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot get service posts: " + e.getMessage());
         }
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<?> getAllMyPosts(
-            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
-    ) {
-        try {            
-            Page<PostDTO> page = postService.getMyPostsAsDTO(PostType.JOB_REQUEST.toString(), pageable);
+    public ResponseEntity<?> getAllMyServicePosts(
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+        try {
+            Page<PostDTO> page = postService.getMyPostsAsDTO(PostType.SERVICE_OFFER.toString(), pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-            return ResponseEntity.ok(response);   
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Cannot get your posts: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot get your service posts: " + e.getMessage());
         }
     }
 
     @GetMapping("user/{userId}")
-    public ResponseEntity<?> getPostsByCreatorId(
+    public ResponseEntity<?> getServicePostsByCreatorId(
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable,
-            @PathVariable Integer userId
-    ) {
-        try {            
-            Page<PostDTO> page = postService.getPostsByCreatorIdAsDTO(userId, PostType.JOB_REQUEST.toString(), pageable);
+            @PathVariable Integer userId) {
+        try {
+            Page<PostDTO> page = postService.getPostsByCreatorIdAsDTO(userId, PostType.SERVICE_OFFER.toString(), pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-            return ResponseEntity.ok(response);   
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Cannot get posts of user " + userId + ":" + e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot get service posts of user " + userId + ":" + e.getMessage());
         }
     }
-
 
     @SuppressWarnings("unchecked")
     @GetMapping("/{id}")
-    public ResponseEntity<String> getPostById(@PathVariable Integer id){
+    public ResponseEntity<String> getServicePostById(@PathVariable Integer id) {
         try {
             @SuppressWarnings("rawtypes")
-            ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.getPostById(id, PostType.JOB_REQUEST)));
+            ResponseEntity res = ResponseEntity.ok(postMapper.toDTO(postService.getPostById(id, PostType.SERVICE_OFFER)));
             return res;
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Cannot get post with id " + id + " : " + e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot get service post with id " + id + " : " + e.getMessage());
         }
-
     }
-
-    // @GetMapping()
-    // @ResponseBody
-    // public ResponseEntity<?> getPostByUserId(
-    //     @RequestParam Integer userId,
-    //     @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
-    // ){
-    //     try {
-    //         Page<PostDTO> page = postService.getPostsByCreatorId(userId, pageable).map(postMapper::toDTO);
-    //         PagedResponse<PostDTO> response = PagedResponse.formPage(page);
-
-    //         return ResponseEntity.ok(response);
-    //     } catch (Exception e) {
-    //         return ResponseEntity.badRequest().body("Cannot get post with user id " + userId + " : " + e.getMessage());
-    //     }
-
-    // }
-
-
-
-
-    
 }

@@ -4,7 +4,7 @@ This document summarizes the backend changes for introducing Fiverr-style servic
 
 ## Goal
 
-Support two listing types in the same `Post` model:
+Support two listing types in the same `Post` model with separate endpoint groups:
 
 - `JOB_REQUEST` (existing behavior, default)
 - `SERVICE_OFFER` (new "I can do X/Y" style posts)
@@ -71,17 +71,20 @@ Files:
 - `src/main/java/com/example/Job_Post/service/PostService.java`
 - `src/main/java/com/example/Job_Post/specification/PostSpecification.java`
 
-### 6) Controller query support
+### 6) Separate controller paths (hard separation)
 
-Updated endpoints with optional query param:
+Job pages (`JOB_REQUEST`) use:
 
-- `GET /api/v1/posts/all?postType=...`
-- `GET /api/v1/posts/mine?postType=...`
-- `GET /api/v1/posts/user/{userId}?postType=...`
+- `/api/v1/posts/**`
 
-Default:
+Service pages (`SERVICE_OFFER`) use:
 
-- `postType=job_request` when omitted
+- `/api/v1/service-posts/**`
+
+Backend enforces type by path:
+
+- `/api/v1/posts/**` cannot fetch/edit/delete service posts
+- `/api/v1/service-posts/**` cannot fetch/edit/delete job posts
 
 File:
 - `src/main/java/com/example/Job_Post/controller/PostController.java`
@@ -102,14 +105,8 @@ All existing fields remain unchanged.
 
 ## Query parameter
 
-- `postType` values for GET filters:
-  - `job_request`
-  - `service_offer`
-
-Notes:
-
-- filter query is case-insensitive
-- omitted `postType` behaves as `job_request`
+- Frontend no longer needs to send `postType` to switch tabs.
+- Separation is by endpoint path/controller.
 
 ---
 
@@ -164,13 +161,13 @@ Content-Type: application/json
 ## C) New services tab fetch
 
 ```http
-GET /api/v1/posts/all?postType=service_offer&sortBy=newest&page=0&size=10
+GET /api/v1/service-posts/all?sortBy=newest&page=0&size=10
 ```
 
 ## D) Existing jobs tab fetch (explicit)
 
 ```http
-GET /api/v1/posts/all?postType=job_request&sortBy=newest&page=0&size=10
+GET /api/v1/posts/all?sortBy=newest&page=0&size=10
 ```
 
 ---
@@ -178,14 +175,16 @@ GET /api/v1/posts/all?postType=job_request&sortBy=newest&page=0&size=10
 ## Frontend Implementation Checklist
 
 1. Add two feed tabs:
-   - Jobs -> query `postType=job_request`
-   - Services -> query `postType=service_offer`
+   - Jobs -> `/api/v1/posts/all`
+   - Services -> `/api/v1/service-posts/all`
 2. Update create-post form:
    - add selector/toggle for post type
    - show service-specific inputs only for `SERVICE_OFFER`
 3. Keep existing create/edit logic as-is for jobs:
    - safe because backend default remains `JOB_REQUEST`
-4. Update "My posts" and "User profile posts" tabs similarly using `postType` query.
+4. Update "My posts" and "User profile posts" tabs similarly:
+   - Jobs: `/api/v1/posts/mine`, `/api/v1/posts/user/{userId}`
+   - Services: `/api/v1/service-posts/mine`, `/api/v1/service-posts/user/{userId}`
 5. Keep current apply/order flow unchanged for now:
    - backend reuse strategy is active
    - label updates can be done in UI (`Apply` vs `Request Service`)
@@ -202,6 +201,6 @@ GET /api/v1/posts/all?postType=job_request&sortBy=newest&page=0&size=10
 
 ## Compatibility Summary
 
-- Existing frontend calls continue to work without modification.
+- Existing job-post frontend calls continue to work without modification.
 - New feature is additive.
 - Minimal backend migration risk due to defaults and null-safe filtering.
