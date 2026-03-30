@@ -120,7 +120,9 @@ public class PostService {
 
         post.setTitle(request.getTitle());
         post.setDescription(request.getDescription());
-        post.setCompanyName(request.getCompanyName());
+        boolean isCompany = Boolean.TRUE.equals(request.getIsCompany());
+        post.setIsCompany(isCompany);
+        post.setCompanyName(isCompany ? request.getCompanyName() : null);
         post.setLocation(request.getLocation());
         post.setEmploymentType(request.getEmploymentType());
         post.setJobCategory(request.getCategory());

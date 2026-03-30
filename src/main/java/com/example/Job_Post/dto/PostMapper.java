@@ -26,14 +26,15 @@ public class PostMapper {
         if (postDTO == null) {
             return null;
         }
+        boolean isCompany = Boolean.TRUE.equals(postDTO.getIsCompany());
 
         return Post.builder()
                 .id(postDTO.getId())
                 .creator(userMapper.toEntity(postDTO.getPoster()))
                 .title(postDTO.getTitle())
                 .description(postDTO.getDescription())
-                .companyName(postDTO.getIsCompany() ? postDTO.getCompanyName() : null)
-                .isCompany(postDTO.getIsCompany())
+                .companyName(isCompany ? postDTO.getCompanyName() : null)
+                .isCompany(isCompany)
                 .location(postDTO.getLocation())
                 .employmentType(postDTO.getEmploymentType())
                 .jobCategory(postDTO.getCategory())
@@ -62,13 +63,14 @@ public class PostMapper {
         }        
 
         System.out.println("\nhey\n");
+        boolean isCompany = Boolean.TRUE.equals(post.getIsCompany());
         PostDTO postDTO = PostDTO.builder()
                 .id(post.getId())
                 .poster(userMapper.toDTO(post.getCreator()))
                 .title(post.getTitle())
                 .description(post.getDescription())
-                .isCompany(post.getIsCompany())
-                .companyName(post.getIsCompany() ? post.getCompanyName() : null)
+                .isCompany(isCompany)
+                .companyName(isCompany ? post.getCompanyName() : null)
                 .location(post.getLocation())
                 .employmentType(post.getEmploymentType())
                 .category(post.getJobCategory())
@@ -122,8 +124,8 @@ public class PostMapper {
                 .poster(poster)
                 .title(post.getTitle())
                 .description(post.getDescription())
-                .isCompany(post.getIsCompany())
-                .companyName(post.getIsCompany() ? post.getCompanyName() : null)
+                .isCompany(Boolean.TRUE.equals(post.getIsCompany()))
+                .companyName(Boolean.TRUE.equals(post.getIsCompany()) ? post.getCompanyName() : null)
                 .location(post.getLocation())
                 .employmentType(post.getEmploymentType())
                 .category(post.getJobCategory())
@@ -157,13 +159,14 @@ public class PostMapper {
         }
 
         User creator = post.getCreator();
+        boolean isCompany = Boolean.TRUE.equals(post.getIsCompany());
         return PostDTO.builder()
                 .id(post.getId())
                 .poster(userMapper.toSummaryDTO(creator))
                 .title(post.getTitle())
                 .description(post.getDescription())
-                .isCompany(post.getIsCompany())
-                .companyName(post.getIsCompany() ? post.getCompanyName() : null)
+                .isCompany(isCompany)
+                .companyName(isCompany ? post.getCompanyName() : null)
                 .location(post.getLocation())
                 .employmentType(post.getEmploymentType())
                 .category(post.getJobCategory())

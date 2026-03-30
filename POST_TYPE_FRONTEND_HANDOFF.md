@@ -137,7 +137,7 @@ No `postType` sent -> backend stores as `JOB_REQUEST`.
 ## B) New service offer post
 
 ```http
-POST /api/v1/posts/create
+POST /api/v1/service-posts/create
 Content-Type: application/json
 ```
 
@@ -169,6 +169,18 @@ GET /api/v1/service-posts/all?sortBy=newest&page=0&size=10
 ```http
 GET /api/v1/posts/all?sortBy=newest&page=0&size=10
 ```
+
+## E) Frontend payload robustness
+
+Backend now accepts frontend form-style empty strings for numeric fields and maps them to `null`:
+
+- `salary: "" -> null`
+- `salaryRangeLower: "" -> null`
+- `salaryRangeUpper: "" -> null`
+- `serviceDeliveryDays: "" -> null`
+- `serviceRevisionCount: "" -> null`
+
+Missing `isCompany` is treated as `false`.
 
 ---
 

@@ -119,6 +119,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path != null && (
                 (request.getMethod().equals("GET") && path.equals("/api/v1/posts/all")) ||
                 (request.getMethod().equals("GET") && path.startsWith("/api/v1/posts/")) ||
+                (request.getMethod().equals("GET") && path.startsWith("/api/v1/service-posts/")) ||
                 (request.getMethod().equals("GET") && path.startsWith("/api/v1/job-applications/user-applications/")) 
 
                 )

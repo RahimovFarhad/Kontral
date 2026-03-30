@@ -3,7 +3,10 @@ package com.example.Job_Post.dto;
 import java.time.Instant;
 import java.util.List;
 
+import com.example.Job_Post.dto.deserializer.NullableDoubleDeserializer;
+import com.example.Job_Post.dto.deserializer.NullableIntegerDeserializer;
 import com.example.Job_Post.enumerator.PostType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,16 +33,21 @@ public class PostDTO {
     private String category; 
     private PostType postType;
 
+    @JsonDeserialize(using = NullableDoubleDeserializer.class)
     private Double salary; // e.g., "50,000"
     // private Double salaryMin;
     // private Double salaryMax;
     private String salaryRange; 
+    @JsonDeserialize(using = NullableDoubleDeserializer.class)
     private Double salaryRangeLower;
+    @JsonDeserialize(using = NullableDoubleDeserializer.class)
     private Double salaryRangeUpper;
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isNegotiable; // e.g., true if salary is negotiable
+    @JsonDeserialize(using = NullableIntegerDeserializer.class)
     private Integer serviceDeliveryDays;
+    @JsonDeserialize(using = NullableIntegerDeserializer.class)
     private Integer serviceRevisionCount;
     private String serviceIncludes;
     private String portfolioUrl;
