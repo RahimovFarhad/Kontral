@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,12 +20,22 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     // Custom query methods can be added here if needed
     // For example, to find notifications by user or type
 
+    @EntityGraph(attributePaths = { "notifiedUser" })
     Page<Notification> findByNotifiedUserId(Integer userId, Pageable pageable); 
     Integer countByNotifiedUserIdAndIsReadFalse(Integer userId);    
     Optional<Notification> findTopByNotifiedUserIdAndIsReadFalseAndNotificationTypeInOrderByCreatedAtDescIdDesc(
         Integer userId,
         List<NotificationType> notificationTypes
     );
+
+    @Query("""
+        select n.notifiedUser.id, count(n)
+        from Notification n
+        where n.isRead = false
+          and n.notifiedUser.id in :userIds
+        group by n.notifiedUser.id
+    """)
+    List<Object[]> countUnreadByUserIds(@Param("userIds") List<Integer> userIds);
 
 
     @Modifying

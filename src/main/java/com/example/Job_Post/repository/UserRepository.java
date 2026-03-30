@@ -45,6 +45,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT u FROM User u WHERE u.verified = true")
     List<User> findAll();
 
+    @EntityGraph(attributePaths = { "skills", "files" })
+    @Query("SELECT u FROM User u WHERE u.verified = true")
+    List<User> findAllWithSkillsAndFiles();
+
     @Query("SELECT u FROM User u WHERE u.verified = true")
     List<User> findAllByStatus(Status status); 
 

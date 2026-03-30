@@ -86,7 +86,7 @@ public class JobApplicationController {
         @PageableDefault(size = 10, sort = "appliedAt") Pageable pageable
     ){
         try {
-            Page<JobApplicationDTO> page = jobApplicationService.getApplicationsToJob(jobId, pageable).map(jobApplicationMapper::toDTO);
+            Page<JobApplicationDTO> page = jobApplicationService.getApplicationsToJob(jobId, pageable).map(jobApplicationMapper::toListDTO);
             PagedResponse<JobApplicationDTO> res = PagedResponse.formPage(page);
             return ResponseEntity.ok(res);
         } catch (Exception e) {
@@ -101,7 +101,7 @@ public class JobApplicationController {
         @PageableDefault(size = 10, sort = "appliedAt") Pageable pageable
     ){
         try {
-            Page<JobApplicationDTO> page = jobApplicationService.getApplicationsToMyJobs(pageable).map(jobApplicationMapper::toDTO);
+            Page<JobApplicationDTO> page = jobApplicationService.getApplicationsToMyJobs(pageable).map(jobApplicationMapper::toListDTO);
             PagedResponse<JobApplicationDTO> res = PagedResponse.formPage(page);
             return ResponseEntity.ok(res);
         } catch (Exception e) {

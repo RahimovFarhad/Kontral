@@ -84,13 +84,28 @@ public class PostSpecification {
         };
     }
 
+    public static Specification<Post> filterByPostType(String postType) {
+        return (root, query, cb) -> {
+            String resolvedPostType = (postType == null || postType.isBlank()) ? "job_request" : postType.trim().toLowerCase();
+            if ("job_request".equals(resolvedPostType)) {
+                return cb.or(
+                    cb.isNull(root.get("postType")),
+                    cb.equal(cb.lower(root.get("postType").as(String.class)), resolvedPostType)
+                );
+            }
+            return cb.equal(cb.lower(root.get("postType").as(String.class)), resolvedPostType);
+        };
+    }
+
     public static Specification<Post> combineFilters(String search, String category, 
                                                       Integer minPrice,
-                                                      String employmentType) {
+                                                      String employmentType,
+                                                      String postType) {
         return Specification
             .where(filterBySearchQuery(search))
             .and(filterByCategory(category))
             .and(filterByMinimumPrice(minPrice))
-            .and(filterByEmploymentType(employmentType));
+            .and(filterByEmploymentType(employmentType))
+            .and(filterByPostType(postType));
     }
 }

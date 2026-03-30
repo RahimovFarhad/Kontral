@@ -4,6 +4,7 @@ package com.example.Job_Post.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import com.example.Job_Post.enumerator.ChatRelationshipStatus;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
 import com.example.Job_Post.repository.ChatRoomRepository;
+import com.example.Job_Post.repository.NotificationRepository;
 import com.example.Job_Post.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class UserService {
     private final UserMapper userMapper;
 
     private final ChatMessageRepository chatMessageRepository;
+    private final NotificationRepository notificationRepository;
     private final CurrentUser cUser;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRelationshipTagService userRelationshipTagService;
@@ -118,9 +121,21 @@ public class UserService {
     }
 
     public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAllWithSkillsAndFiles();
+        if (users.isEmpty()) {
+            return List.of();
+        }
+        List<Integer> userIds = users.stream().map(User::getId).toList();
+        Map<Integer, Integer> unreadNotificationCounts = toCountMap(notificationRepository.countUnreadByUserIds(userIds));
+        Map<Integer, Integer> unreadChatCounts = toCountMap(chatMessageRepository.countUnreadByRecipientIds(userIds));
+
         return users.stream()
-                    .map(user -> userMapper.toDTO(user))
+                    .map(user -> {
+                        UserDTO dto = userMapper.toDTOWithoutLiveCounts(user);
+                        dto.setNewNotificationCount(unreadNotificationCounts.getOrDefault(user.getId(), 0));
+                        dto.setNewChatMessageCount(unreadChatCounts.getOrDefault(user.getId(), 0));
+                        return dto;
+                    })
                     .toList();
     }
 
@@ -214,6 +229,16 @@ public class UserService {
 
         return users;
         
+    }
+
+    private Map<Integer, Integer> toCountMap(List<Object[]> rows) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (Object[] row : rows) {
+            Integer key = (Integer) row[0];
+            Integer value = ((Number) row[1]).intValue();
+            map.put(key, value);
+        }
+        return map;
     }
 
     

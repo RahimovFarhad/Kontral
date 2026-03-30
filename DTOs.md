@@ -89,6 +89,7 @@ Source folder: `src/main/java/com/example/Job_Post/dto`
 - `location: String`
 - `employmentType: String`
 - `category: String`
+- `postType: PostType` (`JOB_REQUEST` default, `SERVICE_OFFER`)
 - `salary: Double`
 - `salaryRange: String`
 - `salaryRangeLower: Double`
@@ -96,6 +97,10 @@ Source folder: `src/main/java/com/example/Job_Post/dto`
 - `salaryCurrency: String`
 - `salaryFrequency: String`
 - `isNegotiable: Boolean`
+- `serviceDeliveryDays: Integer`
+- `serviceRevisionCount: Integer`
+- `serviceIncludes: String`
+- `portfolioUrl: String`
 - `requirements: String`
 - `responsibilities: String`
 - `applicationDeadline: Instant`

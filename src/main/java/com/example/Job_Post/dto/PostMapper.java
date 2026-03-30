@@ -1,6 +1,7 @@
 package com.example.Job_Post.dto;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.PostType;
 import com.example.Job_Post.repository.SavedPostRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,11 +37,16 @@ public class PostMapper {
                 .location(postDTO.getLocation())
                 .employmentType(postDTO.getEmploymentType())
                 .jobCategory(postDTO.getCategory())
+                .postType(resolvePostType(postDTO.getPostType()))
                 .salary(postDTO.getSalary())
                 .salaryRangeLower(postDTO.getSalaryRangeLower())
                 .salaryRangeUpper(postDTO.getSalaryRangeUpper())
                 .salaryCurrency(postDTO.getSalaryCurrency())
                 .salaryFrequency(postDTO.getSalaryFrequency())
+                .serviceDeliveryDays(postDTO.getServiceDeliveryDays())
+                .serviceRevisionCount(postDTO.getServiceRevisionCount())
+                .serviceIncludes(postDTO.getServiceIncludes())
+                .portfolioUrl(postDTO.getPortfolioUrl())
                 .requirements(postDTO.getRequirements())
                 .responsibilities(postDTO.getResponsibilities())
                 .applicationDeadline(postDTO.getApplicationDeadline())
@@ -65,12 +72,17 @@ public class PostMapper {
                 .location(post.getLocation())
                 .employmentType(post.getEmploymentType())
                 .category(post.getJobCategory())
+                .postType(resolvePostType(post.getPostType()))
                 .salary(post.getSalary())
                 .salaryRangeLower(post.getSalaryRangeLower())
                 .salaryRangeUpper(post.getSalaryRangeUpper())
                 .salaryRange((post.getSalaryRangeLower() != null && post.getSalaryRangeUpper() != null) ? post.getSalaryRangeLower().toString() + '-' + post.getSalaryRangeUpper().toString() : null)
                 .salaryCurrency(post.getSalaryCurrency())
                 .salaryFrequency(post.getSalaryFrequency())
+                .serviceDeliveryDays(post.getServiceDeliveryDays())
+                .serviceRevisionCount(post.getServiceRevisionCount())
+                .serviceIncludes(post.getServiceIncludes())
+                .portfolioUrl(post.getPortfolioUrl())
                 .requirements(post.getRequirements())
                 .responsibilities(post.getResponsibilities())
                 .applicationDeadline(post.getApplicationDeadline())
@@ -94,5 +106,84 @@ public class PostMapper {
         return postDTO;
     }
 
-    
+    public PostDTO toDTOForList(
+        Post post,
+        UserDTO poster,
+        boolean isSavedByCurrentUser,
+        int applicationCount,
+        List<String> imageUrls
+    ) {
+        if (post == null) {
+            return null;
+        }
+
+        return PostDTO.builder()
+                .id(post.getId())
+                .poster(poster)
+                .title(post.getTitle())
+                .description(post.getDescription())
+                .isCompany(post.getIsCompany())
+                .companyName(post.getIsCompany() ? post.getCompanyName() : null)
+                .location(post.getLocation())
+                .employmentType(post.getEmploymentType())
+                .category(post.getJobCategory())
+                .postType(resolvePostType(post.getPostType()))
+                .salary(post.getSalary())
+                .salaryRangeLower(post.getSalaryRangeLower())
+                .salaryRangeUpper(post.getSalaryRangeUpper())
+                .salaryRange((post.getSalaryRangeLower() != null && post.getSalaryRangeUpper() != null)
+                        ? post.getSalaryRangeLower().toString() + '-' + post.getSalaryRangeUpper().toString()
+                        : null)
+                .salaryCurrency(post.getSalaryCurrency())
+                .salaryFrequency(post.getSalaryFrequency())
+                .serviceDeliveryDays(post.getServiceDeliveryDays())
+                .serviceRevisionCount(post.getServiceRevisionCount())
+                .serviceIncludes(post.getServiceIncludes())
+                .portfolioUrl(post.getPortfolioUrl())
+                .requirements(post.getRequirements())
+                .responsibilities(post.getResponsibilities())
+                .applicationDeadline(post.getApplicationDeadline())
+                .postedTime(post.getCreatedAt())
+                .imageUrls(imageUrls != null ? imageUrls : Collections.emptyList())
+                .isSavedByCurrentUser(isSavedByCurrentUser)
+                .applicationCount(applicationCount)
+                .isNegotiable(post.getIsNegotiable())
+                .build();
+    }
+
+    public PostDTO toSummaryDTO(Post post) {
+        if (post == null) {
+            return null;
+        }
+
+        User creator = post.getCreator();
+        return PostDTO.builder()
+                .id(post.getId())
+                .poster(userMapper.toSummaryDTO(creator))
+                .title(post.getTitle())
+                .description(post.getDescription())
+                .isCompany(post.getIsCompany())
+                .companyName(post.getIsCompany() ? post.getCompanyName() : null)
+                .location(post.getLocation())
+                .employmentType(post.getEmploymentType())
+                .category(post.getJobCategory())
+                .postType(resolvePostType(post.getPostType()))
+                .salary(post.getSalary())
+                .salaryRangeLower(post.getSalaryRangeLower())
+                .salaryRangeUpper(post.getSalaryRangeUpper())
+                .salaryCurrency(post.getSalaryCurrency())
+                .salaryFrequency(post.getSalaryFrequency())
+                .serviceDeliveryDays(post.getServiceDeliveryDays())
+                .serviceRevisionCount(post.getServiceRevisionCount())
+                .serviceIncludes(post.getServiceIncludes())
+                .portfolioUrl(post.getPortfolioUrl())
+                .applicationDeadline(post.getApplicationDeadline())
+                .postedTime(post.getCreatedAt())
+                .isNegotiable(post.getIsNegotiable())
+                .build();
+    }
+
+    private PostType resolvePostType(PostType postType) {
+        return postType == null ? PostType.JOB_REQUEST : postType;
+    }
 }

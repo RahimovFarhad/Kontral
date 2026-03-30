@@ -94,13 +94,14 @@ public class PostController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) String employmentType,
+            @RequestParam(required = false, defaultValue = "job_request") String postType,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @PageableDefault(size = 10) Pageable pageable,
             Principal principal
     ) {
         try {            
             Page<PostDTO> page = postService.getAllPosts(
-                search, category, minPrice, employmentType, sortBy, pageable
+                search, category, minPrice, employmentType, postType, sortBy, pageable
             );
             
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
@@ -114,10 +115,11 @@ public class PostController {
 
     @GetMapping("/mine")
     public ResponseEntity<?> getAllMyPosts(
+            @RequestParam(required = false, defaultValue = "job_request") String postType,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
         try {            
-            Page<PostDTO> page = postService.getMyPosts(pageable).map(post -> postMapper.toDTO(post));
+            Page<PostDTO> page = postService.getMyPostsAsDTO(postType, pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
             return ResponseEntity.ok(response);   
         } catch (Exception e) {
@@ -129,10 +131,11 @@ public class PostController {
     @GetMapping("user/{userId}")
     public ResponseEntity<?> getPostsByCreatorId(
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable,
+            @RequestParam(required = false, defaultValue = "job_request") String postType,
             @PathVariable Integer userId
     ) {
         try {            
-            Page<PostDTO> page = postService.getPostsByCreatorId(userId, pageable).map(post -> postMapper.toDTO(post));
+            Page<PostDTO> page = postService.getPostsByCreatorIdAsDTO(userId, postType, pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
             return ResponseEntity.ok(response);   
         } catch (Exception e) {

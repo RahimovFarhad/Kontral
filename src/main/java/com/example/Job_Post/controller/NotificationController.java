@@ -38,7 +38,7 @@ public class NotificationController {
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ){
         try {
-            Page<NotificationDTO> page = notificationService.getAllMyNotifications(pageable).map(notificationMapper::toDTO);
+            Page<NotificationDTO> page = notificationService.getAllMyNotifications(pageable).map(notificationMapper::toListDTO);
             PagedResponse<NotificationDTO> res = PagedResponse.formPage(page);
 
             return ResponseEntity.ok(res);

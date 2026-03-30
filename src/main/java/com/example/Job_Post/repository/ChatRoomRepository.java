@@ -3,6 +3,7 @@ package com.example.Job_Post.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,6 +31,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Integer> {
             (c.user2.id = :userId AND (c.user2DeletedAt IS NULL OR c.lastMessageAt > c.user2DeletedAt))
         ORDER BY c.lastMessageAt DESC
     """)
+    @EntityGraph(attributePaths = { "user1", "user2" })
     List<ChatRoom> findVisibleChatRoomsForUser(@Param("userId") Integer userId);
 
     

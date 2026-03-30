@@ -186,7 +186,7 @@ public class SalaryNegotiationService {
     public List<SalaryNegotiationDTO> getAllNegotiations(Integer jobApplicationId) {
         List<SalaryNegotiation> negotiations = salaryNegotiationRepository.findByJobApplicationId(jobApplicationId);
         return negotiations.stream()
-                .map(salaryNegotiationMapper::toDTO)
+                .map(salaryNegotiationMapper::toListDTO)
                 .collect(Collectors.toList());
     }
 

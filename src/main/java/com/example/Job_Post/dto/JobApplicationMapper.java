@@ -1,5 +1,7 @@
 package com.example.Job_Post.dto;
 
+import java.util.Collections;
+
 import org.springframework.stereotype.Component;
 
 import com.example.Job_Post.entity.JobApplication;
@@ -78,6 +80,55 @@ public class JobApplicationMapper {
                 .location(jobApplication.getLocation())
                 .build();
             
+    }
+
+    public JobApplicationDTO toListDTO(JobApplication jobApplication) {
+        if (jobApplication == null) {
+            return null;
+        }
+        return JobApplicationDTO.builder()
+                .id(jobApplication.getId())
+                .postDTO(postMapper.toDTOForList(
+                        jobApplication.getPost(),
+                        userMapper.toSummaryDTO(jobApplication.getPost() != null ? jobApplication.getPost().getCreator() : null),
+                        false,
+                        0,
+                        Collections.emptyList()
+                ))
+                .creatorDTO(userMapper.toSummaryDTO(jobApplication.getCreator()))
+                .files(jobApplication.getFiles().stream().map(fileMapper::toDto).toList())
+                .status(jobApplication.getStatus())
+                .other(jobApplication.getOther())
+                .firstName(jobApplication.getFirstName())
+                .lastName(jobApplication.getLastName())
+                .email(jobApplication.getEmail())
+                .contactNumber(jobApplication.getContactNumber())
+                .location(jobApplication.getLocation())
+                .appliedAt(jobApplication.getAppliedAt())
+                .finalSalary(jobApplication.getFinalSalary())
+                .build();
+    }
+
+    public SafeJobApplicationDTO toSafeListDTO(JobApplication jobApplication) {
+        if (jobApplication == null) {
+            return null;
+        }
+        return SafeJobApplicationDTO.builder()
+                .id(jobApplication.getId())
+                .postDTO(postMapper.toDTOForList(
+                        jobApplication.getPost(),
+                        userMapper.toSummaryDTO(jobApplication.getPost() != null ? jobApplication.getPost().getCreator() : null),
+                        false,
+                        0,
+                        Collections.emptyList()
+                ))
+                .creatorDTO(userMapper.toSummaryDTO(jobApplication.getCreator()))
+                .status(jobApplication.getStatus())
+                .firstName(jobApplication.getFirstName())
+                .lastName(jobApplication.getLastName())
+                .email(jobApplication.getEmail())
+                .location(jobApplication.getLocation())
+                .build();
     }
     
 }

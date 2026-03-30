@@ -1,5 +1,7 @@
 package com.example.Job_Post.dto;
 
+import java.util.Collections;
+
 import org.springframework.stereotype.Component;
 
 import com.example.Job_Post.entity.SavedPost;
@@ -33,6 +35,25 @@ public class SavedPostMapper {
                 .id(savedPost.getId())
                 .postDTO(postMapper.toDTO(savedPost.getPost()))
                 .userDTO(userMapper.toDTO(savedPost.getUser()))
+                .savedAt(savedPost.getSavedAt())
+                .build();
+    }
+
+    public SavedPostDTO toListDTO(SavedPost savedPost) {
+        if (savedPost == null) {
+            return null;
+        }
+
+        return SavedPostDTO.builder()
+                .id(savedPost.getId())
+                .postDTO(postMapper.toDTOForList(
+                        savedPost.getPost(),
+                        userMapper.toSummaryDTO(savedPost.getPost() != null ? savedPost.getPost().getCreator() : null),
+                        true,
+                        0,
+                        Collections.emptyList()
+                ))
+                .userDTO(userMapper.toSummaryDTO(savedPost.getUser()))
                 .savedAt(savedPost.getSavedAt())
                 .build();
     }

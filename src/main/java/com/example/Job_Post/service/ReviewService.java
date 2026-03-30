@@ -152,7 +152,7 @@ public class ReviewService {
         User receiver = userService.getUserById(receiverId);
 
         return reviewRepository.findByReceiver(receiver, pageable)
-                .map(reviewMapper::toDTO);
+                .map(reviewMapper::toListDTO);
     }
 
     public Page<ReviewDTO> getReviewsByReceiverAndRating(Integer receiverId, Integer rating, Pageable pageable ){
@@ -163,7 +163,7 @@ public class ReviewService {
         User receiver = userService.getUserById(receiverId);
 
         return reviewRepository.findByReceiverAndRatingIs(receiver, rating, pageable)
-                .map(reviewMapper::toDTO);  
+                .map(reviewMapper::toListDTO);  
     }
 
 

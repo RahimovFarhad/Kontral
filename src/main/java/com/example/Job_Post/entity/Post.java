@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.example.Job_Post.enumerator.PostType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -62,6 +65,10 @@ public class Post {
 
     private String employmentType; // e.g., Full-time, Part-time, Contract
     private String jobCategory; // e.g., "Software Development", "Marketing"
+    
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private PostType postType = PostType.JOB_REQUEST;
 
     private Double salary; // e.g., "50,00"
     private Double salaryRangeLower;
@@ -69,6 +76,12 @@ public class Post {
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isNegotiable; // e.g., true if salary is negotiable
+
+    private Integer serviceDeliveryDays;
+    private Integer serviceRevisionCount;
+    @Column(columnDefinition = "TEXT")
+    private String serviceIncludes;
+    private String portfolioUrl;
 
     @Column(columnDefinition = "TEXT")
     private String requirements; // e.g., "Bachelor's degree in Computer Science or related field"

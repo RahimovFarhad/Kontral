@@ -48,5 +48,22 @@ public class SalaryNegotiationMapper {
                 .initiator(userMapper.toDTO(entity.getInitiator()))
                 .build();
     }
+
+    public SalaryNegotiationDTO toListDTO(SalaryNegotiation entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return SalaryNegotiationDTO.builder()
+                .id(entity.getId())
+                .jobApplication(jobApplicationMapper.toListDTO(entity.getJobApplication()))
+                .status(entity.getStatus().toString())
+                .offers(entity.getOffers() != null ? entity.getOffers().stream()
+                        .map(salaryOfferMapper::toListDTO)
+                        .toList() : null)
+                .createdAt(entity.getCreatedAt())
+                .initiator(userMapper.toSummaryDTO(entity.getInitiator()))
+                .build();
+    }
     
 }

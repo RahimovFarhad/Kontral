@@ -356,7 +356,7 @@ public class JobApplicationService {
     public List<JobApplicationDTO> getMyApplications() {
         User currentUser = cUser.get();
 
-        return jobApplicationRepository.findByCreatorAndIsWithdrawnFalse(currentUser).stream().map(application -> jobApplicationMapper.toDTO(application)).toList();
+        return jobApplicationRepository.findByCreatorAndIsWithdrawnFalse(currentUser).stream().map(jobApplicationMapper::toListDTO).toList();
 
 
     }
@@ -419,7 +419,7 @@ public class JobApplicationService {
         return jobApplicationRepository.findByCreatorAndStatusIn(
             user, 
             List.of(JobApplicationStatus.HIRED, JobApplicationStatus.JOB_COMPLETED)
-        ).stream().map(application -> jobApplicationMapper.toSafeDTO(application)).toList();
+        ).stream().map(jobApplicationMapper::toSafeListDTO).toList();
     }
     
 }

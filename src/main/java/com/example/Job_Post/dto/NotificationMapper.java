@@ -51,4 +51,23 @@ public class NotificationMapper {
                 .createdAt(notification.getCreatedAt())
                 .build();
     }
+
+    public NotificationDTO toListDTO(Notification notification) {
+        if (notification == null) {
+            return null;
+        }
+
+        return NotificationDTO.builder()
+                .id(notification.getId())
+                .notifiedUserDTO(userMapper.toSummaryDTO(notification.getNotifiedUser()))
+                .notificationType(notification.getNotificationType() != null ?
+                    notification.getNotificationType().name() : null)
+                .subjectId(notification.getSubjectId())
+                .subjectType(notification.getSubjectType() != null ?
+                    notification.getSubjectType().name() : null)
+                .content(notification.getContent())
+                .isRead(notification.isRead())
+                .createdAt(notification.getCreatedAt())
+                .build();
+    }
 }

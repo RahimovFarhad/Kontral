@@ -68,7 +68,7 @@ public class SavedPostController {
         @PageableDefault(size = 10, sort = "savedAt") Pageable pageable
     ) {
         try {
-            PagedResponse<SavedPostDTO> pagedResponse= PagedResponse.formPage(savedPostService.getMySavedPosts(pageable).map(savedPostMapper::toDTO));
+            PagedResponse<SavedPostDTO> pagedResponse= PagedResponse.formPage(savedPostService.getMySavedPosts(pageable).map(savedPostMapper::toListDTO));
             return ResponseEntity.ok(pagedResponse);
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,6 +3,7 @@ package com.example.Job_Post.repository;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,15 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
 
     Integer countByRecipientIdAndIsReadFalse(Integer recipientId);
 
+    @Query("""
+        select m.recipient.id, count(m)
+        from ChatMessage m
+        where m.isRead = false
+          and m.recipient.id in :recipientIds
+        group by m.recipient.id
+    """)
+    List<Object[]> countUnreadByRecipientIds(@Param("recipientIds") List<Integer> recipientIds);
+
 
     @Query("SELECT DISTINCT m.sender.id FROM ChatMessage m " +
         "WHERE m.recipient.id = :currentUserId AND m.isRead = false")
@@ -31,6 +41,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
     """)
     ChatMessage getChatMessageByIdLightweight(Integer id);
 
+    @EntityGraph(attributePaths = { "sender", "recipient", "chatRoom" })
     List<ChatMessage> findByChatRoom(ChatRoom chatRoom);
 
 

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,10 +17,13 @@ import com.example.Job_Post.enumerator.JobApplicationStatus;
 
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Integer> {
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
     List<JobApplication> findByCreatorAndIsWithdrawnFalse(User creator);
 
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
     List<JobApplication> findByCreatorAndStatusIn(User creator, List<JobApplicationStatus> statuses);
 
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
     Page<JobApplication> findByPostAndIsWithdrawnFalse(Post post, Pageable pageable);
 
     Integer countByPostIdAndIsWithdrawnFalse(Integer id);
@@ -29,6 +33,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     Optional<JobApplication> findByPostIdAndCreatorIdAndIsWithdrawnFalse(Integer postId, Integer creatorId);
 
 
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
     Page<JobApplication> findByPostCreatorIdAndIsWithdrawnFalse(Integer id, Pageable pageable);
 
     @Query("""
@@ -48,6 +53,15 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
         @Param("userBId") Integer userBId,
         Pageable pageable
     );
+
+    @Query("""
+        select ja.post.id, count(ja)
+        from JobApplication ja
+        where ja.isWithdrawn = false
+          and ja.post.id in :postIds
+        group by ja.post.id
+    """)
+    List<Object[]> countActiveByPostIds(@Param("postIds") List<Integer> postIds);
 
 
 

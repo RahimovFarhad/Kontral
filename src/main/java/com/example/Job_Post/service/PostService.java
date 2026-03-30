@@ -3,7 +3,13 @@ package com.example.Job_Post.service;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,14 +22,19 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.Job_Post.component.CurrentUser;
 import com.example.Job_Post.dto.PostDTO;
 import com.example.Job_Post.dto.PostMapper;
+import com.example.Job_Post.dto.UserDTO;
+import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.Post;
 import com.example.Job_Post.entity.PostImages;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.NotificationType;
+import com.example.Job_Post.enumerator.PostType;
 import com.example.Job_Post.enumerator.SubjectType;
 import com.example.Job_Post.repository.JobApplicationRepository;
 import com.example.Job_Post.repository.PostRepository;
+import com.example.Job_Post.repository.PostImagesRepository;
 import com.example.Job_Post.repository.SavedPostRepository;
+import com.example.Job_Post.repository.UserRepository;
 import com.example.Job_Post.specification.PostSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +49,9 @@ public class PostService {
     private final PostMapper postMapper;
     private final SavedPostRepository savedPostRepository;
     private final JobApplicationRepository jobApplicationRepository;
+    private final PostImagesRepository postImagesRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final FileUploadService fileUploadService;
 
     private final NotificationService notificationService;
@@ -55,6 +69,7 @@ public class PostService {
  
         newPost.setCreator(cUser.get());
         newPost.setCreatedAt(Instant.now());
+        newPost.setPostType(resolvePostType(post.getPostType()));
 
         if (post.getSalary() == null && (post.getSalaryRangeLower() == null || post.getSalaryRangeUpper() == null)) {
             throw new IllegalArgumentException("Either salary or both salary range bounds must be provided.");
@@ -99,10 +114,17 @@ public class PostService {
         post.setLocation(request.getLocation());
         post.setEmploymentType(request.getEmploymentType());
         post.setJobCategory(request.getCategory());
+        post.setPostType(request.getPostType() != null ? request.getPostType() : resolvePostType(post.getPostType()));
         post.setSalary(request.getSalary());
         post.setSalaryRangeLower(request.getSalaryRangeLower());
         post.setSalaryRangeUpper(request.getSalaryRangeUpper());
         post.setSalaryCurrency(request.getSalaryCurrency());
+        post.setSalaryFrequency(request.getSalaryFrequency());
+        post.setIsNegotiable(request.getIsNegotiable());
+        post.setServiceDeliveryDays(request.getServiceDeliveryDays());
+        post.setServiceRevisionCount(request.getServiceRevisionCount());
+        post.setServiceIncludes(request.getServiceIncludes());
+        post.setPortfolioUrl(request.getPortfolioUrl());
         post.setRequirements(request.getRequirements());
         post.setResponsibilities(request.getResponsibilities());
         post.setApplicationDeadline(request.getApplicationDeadline());
@@ -157,22 +179,22 @@ public class PostService {
 
     @Transactional
     public Page<PostDTO> getAllPosts(Pageable pageable) {
-        return postRepository.findAll(pageable).map(postMapper::toDTO);
+        return getAllPosts(null, null, null, null, "job_request", "newest", pageable);
     }
 
     @Transactional
     public Page<PostDTO> getAllPosts(String search, String category, Integer minPrice, 
-                                String employmentType, String sortBy, Pageable pageable) {
+                                String employmentType, String postType, String sortBy, Pageable pageable) {
         
         // Create combined specification
-        var spec = PostSpecification.combineFilters(search, category, minPrice, employmentType);
+        var spec = PostSpecification.combineFilters(search, category, minPrice, employmentType, postType);
         
         // Handle custom sorting
         if (sortBy != null && !sortBy.isEmpty()) {
             pageable = applyCustomSort(sortBy, pageable);
         }
         
-        return postRepository.findAll(spec, pageable).map(postMapper::toDTO);
+        return mapPostsPage(postRepository.findAll(spec, pageable));
     }
 
     private Pageable applyCustomSort(String sortBy, Pageable pageable) {
@@ -202,10 +224,108 @@ public class PostService {
         return postRepository.findByCreatorId(userId, pageable);
     }
 
+    @Transactional
+    public Page<PostDTO> getPostsByCreatorIdAsDTO(Integer userId, Pageable pageable) {
+        return getPostsByCreatorIdAsDTO(userId, "job_request", pageable);
+    }
+
+    @Transactional
+    public Page<PostDTO> getPostsByCreatorIdAsDTO(Integer userId, String postType, Pageable pageable) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id cannot be null");
+        }
+        var spec = PostSpecification.filterByPostType(postType)
+                .and((root, query, cb) -> cb.equal(root.get("creator").get("id"), userId));
+        return mapPostsPage(postRepository.findAll(spec, pageable));
+    }
+
     public Page<Post> getMyPosts(Pageable pageable) {
         User currentUser = cUser.get();
         return getPostsByCreatorId(currentUser.getId(), pageable);
     } 
+
+    @Transactional
+    public Page<PostDTO> getMyPostsAsDTO(Pageable pageable) {
+        return getMyPostsAsDTO("job_request", pageable);
+    }
+
+    @Transactional
+    public Page<PostDTO> getMyPostsAsDTO(String postType, Pageable pageable) {
+        User currentUser = cUser.get();
+        return getPostsByCreatorIdAsDTO(currentUser.getId(), postType, pageable);
+    }
+
+    private Page<PostDTO> mapPostsPage(Page<Post> postPage) {
+        List<Post> posts = postPage.getContent();
+        if (posts.isEmpty()) {
+            return postPage.map(post -> postMapper.toDTOForList(post, null, false, 0, Collections.emptyList()));
+        }
+
+        List<Integer> postIds = posts.stream().map(Post::getId).toList();
+
+        Set<Integer> savedPostIds = resolveSavedPostIds(postIds);
+        Map<Integer, Integer> applicationCountByPostId = resolveApplicationCounts(postIds);
+        Map<Integer, List<String>> imageUrlsByPostId = resolveImageUrls(postIds);
+        Map<Integer, UserDTO> posterById = resolvePosterDTOs(posts);
+
+        return postPage.map(post -> {
+            Integer creatorId = post.getCreator() != null ? post.getCreator().getId() : null;
+            return postMapper.toDTOForList(
+                post,
+                creatorId != null ? posterById.get(creatorId) : null,
+                savedPostIds.contains(post.getId()),
+                applicationCountByPostId.getOrDefault(post.getId(), 0),
+                imageUrlsByPostId.getOrDefault(post.getId(), Collections.emptyList())
+            );
+        });
+    }
+
+    private Set<Integer> resolveSavedPostIds(List<Integer> postIds) {
+        try {
+            User currentUser = cUser.get();
+            if (currentUser == null || currentUser.getId() == null) {
+                return Collections.emptySet();
+            }
+            return new HashSet<>(
+                savedPostRepository.findSavedPostIdsByUserIdAndPostIds(currentUser.getId(), postIds)
+            );
+        } catch (Exception e) {
+            return Collections.emptySet();
+        }
+    }
+
+    private Map<Integer, Integer> resolveApplicationCounts(List<Integer> postIds) {
+        Map<Integer, Integer> countByPostId = new HashMap<>();
+        for (Object[] row : jobApplicationRepository.countActiveByPostIds(postIds)) {
+            Integer postId = (Integer) row[0];
+            Integer count = ((Number) row[1]).intValue();
+            countByPostId.put(postId, count);
+        }
+        return countByPostId;
+    }
+
+    private Map<Integer, List<String>> resolveImageUrls(List<Integer> postIds) {
+        Map<Integer, List<String>> imageUrlsByPostId = new HashMap<>();
+        for (PostImages image : postImagesRepository.findByPostIdInOrderByCreatedAtAsc(postIds)) {
+            Integer postId = image.getPost() != null ? image.getPost().getId() : null;
+            if (postId == null) {
+                continue;
+            }
+            imageUrlsByPostId.computeIfAbsent(postId, k -> new ArrayList<>()).add(image.getImageUrl());
+        }
+        return imageUrlsByPostId;
+    }
+
+    private Map<Integer, UserDTO> resolvePosterDTOs(List<Post> posts) {
+        Set<Integer> creatorIds = posts.stream()
+                .map(Post::getCreator)
+                .filter(creator -> creator != null && creator.getId() != null)
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        return userRepository.findAllById(creatorIds).stream()
+                .collect(Collectors.toMap(User::getId, userMapper::toSummaryDTO));
+    }
 
     private void validateImages(List<MultipartFile> images) {
         if (images == null) {
@@ -248,6 +368,10 @@ public class PostService {
         }
 
         post.setImages(uploadedImages);
+    }
+
+    private PostType resolvePostType(PostType postType) {
+        return postType == null ? PostType.JOB_REQUEST : postType;
     }
     
 }

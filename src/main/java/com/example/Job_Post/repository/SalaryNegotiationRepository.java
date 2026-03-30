@@ -2,6 +2,7 @@ package com.example.Job_Post.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.Job_Post.entity.SalaryNegotiation;
@@ -9,6 +10,10 @@ import com.example.Job_Post.enumerator.NegotiationStatus;
 
 public interface SalaryNegotiationRepository extends JpaRepository<SalaryNegotiation, Integer> {
 
+    @EntityGraph(attributePaths = {
+        "jobApplication", "jobApplication.creator", "jobApplication.post", "jobApplication.post.creator",
+        "initiator", "offers", "offers.sender"
+    })
     List<SalaryNegotiation> findByJobApplicationId(Integer jobApplicationId);
 
     SalaryNegotiation findByJobApplicationIdAndStatus(Integer jobApplicationId, NegotiationStatus status);

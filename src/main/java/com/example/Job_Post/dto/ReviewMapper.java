@@ -43,4 +43,20 @@ public class ReviewMapper {
                 .build();
     }
 
+    public ReviewDTO toListDTO(Review review) {
+        if (review == null) {
+            return null;
+        }
+
+        return ReviewDTO.builder()
+                .id(review.getId())
+                .jobApplication(jobApplicationMapper.toListDTO(review.getJobApplication()))
+                .writer(userMapper.toSummaryDTO(review.getWriter()))
+                .receiver(userMapper.toSummaryDTO(review.getReceiver()))
+                .review(review.getReview())
+                .rating(review.getRating())
+                .createdAt(review.getCreatedAt())
+                .build();
+    }
+
 }

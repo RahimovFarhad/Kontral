@@ -81,6 +81,65 @@ public class UserMapper {
         return dto;
     }
 
+    public UserDTO toSummaryDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setNickName(user.getNickName() != null ? user.getNickName() : user.getEmail());
+        dto.setEmail(user.getEmail());
+        dto.setStatus(user.getStatus() != null ? user.getStatus().toString() : null);
+        dto.setAboutMe(user.getAboutMe());
+        dto.setProfileImage(user.getImageUrl());
+        dto.setAverageRating(user.getAverageRating());
+        dto.setCreatedAt(user.getCreated_at());
+        dto.setUpdatedAt(user.getUpdated_at());
+        dto.setLinkedIn(user.getLinkedIn());
+        dto.setIsCompany(user instanceof Company);
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setContactNumber(user.getContactNumber());
+        return dto;
+    }
+
+    public UserDTO toDTOWithoutLiveCounts(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserDTO userDTO;
+        if (user instanceof Company) {
+            CompanyDTO companyDTO = new CompanyDTO();
+            companyDTO.setCompanyName(((Company) user).getCompanyName());
+            companyDTO.setWebsite(((Company) user).getWebsite());
+            companyDTO.setDescription(((Company) user).getDescription());
+            userDTO = companyDTO;
+            userDTO.setIsCompany(true);
+        } else {
+            userDTO = new UserDTO();
+        }
+        userDTO.setId(user.getId());
+        userDTO.setNickName(user.getNickName() != null ? user.getNickName() : user.getEmail());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setStatus(user.getStatus().toString());
+        userDTO.setAboutMe(user.getAboutMe());
+        userDTO.setProfileImage(user.getImageUrl());
+        userDTO.setAverageRating(user.getAverageRating());
+        userDTO.setCreatedAt(user.getCreated_at());
+        userDTO.setUpdatedAt(user.getUpdated_at());
+        userDTO.setSkills(user.getSkills().stream().map(skill -> new SkillMapper().toDTO(skill)).toList());
+        userDTO.setFiles(user.getFiles().stream().map(file -> new FileMapper().toDto(file)).toList());
+        userDTO.setNumber(user.getPhoneNumber());
+        userDTO.setLinkedIn(user.getLinkedIn());
+        userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        userDTO.setIsAccountComplete(isAccountComplete(user));
+        userDTO.setFirstName(user.getFirstName());
+        userDTO.setLastName(user.getLastName());
+        userDTO.setContactNumber(user.getContactNumber());
+        return userDTO;
+    }
+
 
     
 
@@ -174,4 +233,3 @@ public class UserMapper {
     }
     
 }
-

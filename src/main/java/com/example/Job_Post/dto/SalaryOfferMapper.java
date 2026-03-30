@@ -29,6 +29,23 @@ public class SalaryOfferMapper {
                 .build();
     }
 
+    public SalaryOfferDTO toListDTO(SalaryOffer offer) {
+        if (offer == null) {
+            return null;
+        }
+
+        return SalaryOfferDTO.builder()
+                .id(offer.getId())
+                .negotiationId(offer.getNegotiation().getId())
+                .sender(userMapper.toSummaryDTO(offer.getSender()))
+                .proposedSalary(offer.getProposedSalary())
+                .message(offer.getMessage())
+                .accepted(offer.isAccepted())
+                .isResponded(offer.isResponded())
+                .createdAt(offer.getCreatedAt())
+                .build();
+    }
+
     public SalaryOffer toEntity(SalaryOfferDTO offerDTO) {
         if (offerDTO == null) {
             return null;
