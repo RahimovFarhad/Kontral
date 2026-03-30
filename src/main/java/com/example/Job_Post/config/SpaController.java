@@ -12,6 +12,7 @@ public class SpaController {
         "/browse/**",
         "/signup",
         "/post",
+        "/post/service-offer",
         "/profile/**",
         "/chat/**",
         "/notifications",
