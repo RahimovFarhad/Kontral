@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/review")
 public class ReviewController {
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
     @PostMapping("/create")
     public ResponseEntity<?> writeReview(

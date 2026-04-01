@@ -82,24 +82,26 @@ public class UserService {
     }
 
     public User changeRating(String method, User user, Integer ratingNew, Integer ratingBefore){
-        double averageRating = user.getAverageRating();
-        int ratingCount = user.getRatingCount();
+        double averageRating = user.getAverageRating() == null ? 0.0 : user.getAverageRating();
+        int ratingCount = user.getRatingCount() == null ? 0 : user.getRatingCount();
+        int newRatingValue = ratingNew == null ? 0 : ratingNew;
+        int beforeRatingValue = ratingBefore == null ? 0 : ratingBefore;
 
         double sum;
 
         switch (method.strip().toLowerCase()) {
             case "add":
-                sum = averageRating*ratingCount + ratingNew;
+                sum = averageRating*ratingCount + newRatingValue;
                 ratingCount += 1;
                 break;
             
             case "remove":
-                sum = averageRating*ratingCount - ratingBefore;
-                ratingCount -= 1;
+                sum = averageRating*ratingCount - beforeRatingValue;
+                ratingCount = Math.max(0, ratingCount - 1);
                 break;
             
             case "change":
-                sum = averageRating*ratingCount - ratingBefore + ratingNew ;
+                sum = averageRating*ratingCount - beforeRatingValue + newRatingValue;
                 break;
         
             default:

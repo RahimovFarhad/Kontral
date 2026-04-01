@@ -10,6 +10,7 @@ import com.example.Job_Post.dto.ReviewMapper;
 import com.example.Job_Post.entity.JobApplication;
 import com.example.Job_Post.entity.Review;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.JobApplicationStatus;
 import com.example.Job_Post.enumerator.NotificationType;
 import com.example.Job_Post.enumerator.SubjectType;
 import com.example.Job_Post.repository.ReviewRepository;
@@ -33,6 +34,13 @@ public class ReviewService {
         Integer jobApplicationId
     ) {
         JobApplication jobApplication = jobApplicationService.getJobApplicationById(jobApplicationId);
+        if (jobApplication.getStatus() != JobApplicationStatus.JOB_COMPLETED) {
+            throw new IllegalArgumentException("Review can only be created when job status is JOB_COMPLETED");
+        }
+
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
 
         User writer = cUser.get();
         Boolean isByEmployer = writer.getId().equals(jobApplication.getPost().getCreator().getId());
@@ -40,21 +48,23 @@ public class ReviewService {
         if (!isByEmployer && jobApplication.getCreator().getId() != writer.getId()) {
             throw new IllegalArgumentException("User is not authorized to write this review");
         }
+        if (reviewRepository.existsByJobApplicationIdAndWriterId(jobApplication.getId(), writer.getId())) {
+            throw new IllegalArgumentException("You have already reviewed this job application");
+        }
 
         User receiver = isByEmployer ? jobApplication.getCreator() : jobApplication.getPost().getCreator();
 
         Review reviewObject = Review.builder()
                                     .jobApplication(jobApplication)
                                     .review((review == null || review.strip().length() == 0) ? null : review.strip())
+                                    .rating(rating)
                                     .writer(writer)
                                     .receiver(receiver)
                                     .build();
 
         Review savedReview = reviewRepository.save(reviewObject);
 
-        if (rating != null && rating > 0 && rating <= 5){
-            userService.changeRating("add", receiver, rating, 0);
-        }
+        userService.changeRating("add", receiver, rating, 0);
 
         if (savedReview != null) {
             try {
@@ -128,7 +138,7 @@ public class ReviewService {
 
         reviewRepository.delete(currentReview);
 
-        userService.changeRating("delete", currentReview.getReceiver(), 0, currentReview.getRating());
+        userService.changeRating("remove", currentReview.getReceiver(), 0, currentReview.getRating());
 
         return "Review deleted successfully";
  

@@ -20,7 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
         "writer", "receiver", "jobApplication", "jobApplication.creator", "jobApplication.post", "jobApplication.post.creator"
     })
     Page<Review> findByReceiverAndRatingIs(User receiver, Integer rating, Pageable pageable);
-    
+    boolean existsByJobApplicationIdAndWriterId(Integer jobApplicationId, Integer writerId);
 
 
 }
