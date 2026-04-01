@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.Job_Post.dto.UserWebSocketDTO;
 import com.example.Job_Post.enumerator.AuthMethod;
+import com.example.Job_Post.enumerator.PreferredRole;
 import com.example.Job_Post.enumerator.Role;
 import com.example.Job_Post.enumerator.Status;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -62,7 +63,6 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private ResetToken resetToken;
 
-
     private String nickName;
 
     private String firstName;
@@ -103,6 +103,10 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)            
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private PreferredRole preferredRole = PreferredRole.ALL;
 
     @Enumerated(EnumType.STRING)
     private AuthMethod authMethod; // Assuming AuthMethod is an enum or class that you have defined elsewhere

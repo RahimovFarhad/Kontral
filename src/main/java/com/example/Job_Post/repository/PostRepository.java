@@ -21,6 +21,7 @@ public interface PostRepository extends JpaRepository<Post, Integer>, JpaSpecifi
     Optional<Post> findById(Integer id);
 
     Page<Post> findByCreatorId(Integer creatorId, Pageable pageable);
+    Integer countByCreatorId(Integer creatorId);
 
     Page<Post> findByTitleContaining(String title, Pageable pageable);
 

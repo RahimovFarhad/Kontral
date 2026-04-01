@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.Job_Post.entity.Company;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.PreferredRole;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
 import com.example.Job_Post.repository.NotificationRepository;
@@ -51,6 +52,7 @@ public class UserMapper {
         userDTO.setNewNotificationCount(notificationRepository.countByNotifiedUserIdAndIsReadFalse(user.getId()));
         userDTO.setNewChatMessageCount(chatMessageRepository.countByRecipientIdAndIsReadFalse(user.getId()));
         userDTO.setLinkedIn(user.getLinkedIn());
+        userDTO.setPreferredRole(resolvePreferredRole(user));
         userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
         userDTO.setIsAccountComplete(isAccountComplete(user));
 
@@ -97,6 +99,7 @@ public class UserMapper {
         dto.setCreatedAt(user.getCreated_at());
         dto.setUpdatedAt(user.getUpdated_at());
         dto.setLinkedIn(user.getLinkedIn());
+        dto.setPreferredRole(resolvePreferredRole(user));
         dto.setIsCompany(user instanceof Company);
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
@@ -132,6 +135,7 @@ public class UserMapper {
         userDTO.setFiles(user.getFiles().stream().map(file -> new FileMapper().toDto(file)).toList());
         userDTO.setNumber(user.getPhoneNumber());
         userDTO.setLinkedIn(user.getLinkedIn());
+        userDTO.setPreferredRole(resolvePreferredRole(user));
         userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
         userDTO.setIsAccountComplete(isAccountComplete(user));
         userDTO.setFirstName(user.getFirstName());
@@ -174,6 +178,9 @@ public class UserMapper {
         user.setUpdated_at(userDTO.getUpdatedAt());
         user.setPhoneNumber(userDTO.getNumber());
         user.setLinkedIn(userDTO.getLinkedIn());
+        if (userDTO.getPreferredRole() != null) {
+            user.setPreferredRole(PreferredRole.fromValue(userDTO.getPreferredRole()));
+        }
 
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
@@ -226,10 +233,20 @@ public class UserMapper {
         user.setNickName(userDTO.getNickName());
         user.setAboutMe(userDTO.getAboutMe());
         user.setLinkedIn(userDTO.getLinkedIn());
+        if (userDTO.getPreferredRole() != null) {
+            user.setPreferredRole(PreferredRole.fromValue(userDTO.getPreferredRole()));
+        }
         // user.setSkills(userDTO.getSkills());
         
 
         return user;
+    }
+
+    private String resolvePreferredRole(User user) {
+        if (user.getPreferredRole() == null) {
+            return PreferredRole.ALL.getApiValue();
+        }
+        return user.getPreferredRole().getApiValue();
     }
     
 }

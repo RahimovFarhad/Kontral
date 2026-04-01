@@ -2,6 +2,7 @@ package com.example.Job_Post.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +30,28 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     Integer countByPostIdAndIsWithdrawnFalse(Integer id);
 
     List<JobApplication> findByPostIdAndIsWithdrawnFalse(Integer postId);
+    Integer countByCreatorIdAndIsWithdrawnFalse(Integer creatorId);
+    Integer countByCreatorIdAndStatusInAndIsWithdrawnFalse(Integer creatorId, Set<JobApplicationStatus> statuses);
+    Integer countByCreatorIdAndStatusAndIsWithdrawnFalse(Integer creatorId, JobApplicationStatus status);
+    Integer countByPostCreatorIdAndStatusAndIsWithdrawnFalse(Integer creatorId, JobApplicationStatus status);
 
     Optional<JobApplication> findByPostIdAndCreatorIdAndIsWithdrawnFalse(Integer postId, Integer creatorId);
+
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
+    List<JobApplication> findTop5ByCreatorIdAndStatusInAndIsWithdrawnFalseOrderByAppliedAtDesc(
+        Integer creatorId,
+        Set<JobApplicationStatus> statuses
+    );
 
 
     @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
     Page<JobApplication> findByPostCreatorIdAndIsWithdrawnFalse(Integer id, Pageable pageable);
+
+    @EntityGraph(attributePaths = { "creator", "post", "post.creator", "files" })
+    List<JobApplication> findTop5ByPostCreatorIdAndStatusAndIsWithdrawnFalseOrderByAppliedAtDesc(
+        Integer creatorId,
+        JobApplicationStatus status
+    );
 
     @Query("""
         select ja

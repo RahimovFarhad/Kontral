@@ -25,10 +25,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.Job_Post.auth.AuthenticationRequest;
 import com.example.Job_Post.auth.RegisterRequest;
 import com.example.Job_Post.config.JwtService;
+import com.example.Job_Post.dto.PreferredRoleDTO;
 import com.example.Job_Post.dto.UserDTO;
 import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.ResetToken;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.PreferredRole;
 import com.example.Job_Post.enumerator.AuthMethod;
 import com.example.Job_Post.service.AuthenticationService;
 import com.example.Job_Post.service.FileUploadService;
@@ -313,6 +315,38 @@ public class UserController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Failed to retrieve users: " + e.getMessage());
 
+        }
+    }
+
+    @GetMapping("/preferred-role")
+    public ResponseEntity<?> getMyPreferredRole(Principal principal) {
+        try {
+            User user = userService.getUserByEmail(principal.getName());
+            String preferredRole = user.getPreferredRole() == null
+                ? PreferredRole.ALL.getApiValue()
+                : user.getPreferredRole().getApiValue();
+            return ResponseEntity.ok(new PreferredRoleDTO(preferredRole));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to retrieve preferred role: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/preferred-role")
+    public ResponseEntity<?> updateMyPreferredRole(@RequestBody PreferredRoleDTO preferredRoleDTO, Principal principal) {
+        try {
+            if (preferredRoleDTO == null || preferredRoleDTO.getPreferredRole() == null) {
+                return ResponseEntity.badRequest().body("preferredRole is required.");
+            }
+
+            User user = userService.getUserByEmail(principal.getName());
+            User updated = userService.changePreferredRole(user, preferredRoleDTO.getPreferredRole());
+            return ResponseEntity.ok(new PreferredRoleDTO(
+                updated.getPreferredRole() == null
+                    ? PreferredRole.ALL.getApiValue()
+                    : updated.getPreferredRole().getApiValue()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to update preferred role: " + e.getMessage());
         }
     }
 

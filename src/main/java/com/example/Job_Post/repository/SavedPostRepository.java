@@ -30,6 +30,7 @@ public interface SavedPostRepository extends JpaRepository<SavedPost, Integer>{
     Optional<SavedPost> findByPostIdAndUserId(Integer postId, Integer userId);
 
     boolean existsByPostIdAndUserId(Integer postId, Integer userId);
+    Integer countByUserId(Integer userId);
 
     @Query("""
         select sp.post.id

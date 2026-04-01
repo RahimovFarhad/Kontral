@@ -39,6 +39,7 @@ public class UserDTO {
     private LatestUnreadActionNotificationDTO latestUnreadActionNotification;
 
     private String linkedIn;
+    private String preferredRole;
     
     @Builder.Default
     private Boolean isCompany = false;

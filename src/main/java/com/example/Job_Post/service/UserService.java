@@ -1,6 +1,7 @@
 package com.example.Job_Post.service;
 
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.ChatRelationshipStatus;
+import com.example.Job_Post.enumerator.PreferredRole;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
 import com.example.Job_Post.repository.ChatRoomRepository;
@@ -142,6 +144,13 @@ public class UserService {
     }
 
     public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public User changePreferredRole(User user, String preferredRoleValue) {
+        PreferredRole preferredRole = PreferredRole.fromValue(preferredRoleValue);
+        user.setPreferredRole(preferredRole);
+        user.setUpdated_at(Instant.now());
         return userRepository.save(user);
     }
 
