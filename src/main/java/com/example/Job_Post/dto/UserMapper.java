@@ -53,21 +53,21 @@ public class UserMapper {
         userDTO.setNewChatMessageCount(chatMessageRepository.countByRecipientIdAndIsReadFalse(user.getId()));
         userDTO.setLinkedIn(user.getLinkedIn());
         userDTO.setPreferredRole(resolvePreferredRole(user));
-        userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        // userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        userDTO.setIsFirstTimeAccessing(user.getPreferredRole() == null || user.getNickName() == null);
         userDTO.setIsAccountComplete(isAccountComplete(user));
-
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setContactNumber(user.getContactNumber());
-
         
-
+        
+        
         return userDTO;
     }
-
+    
     public ChatUserDTO toChatDTO(User user, boolean hasUnseen) {
         if (user == null) return null;
-
+        
         ChatUserDTO dto = new ChatUserDTO();
         dto.setId(user.getId());
         dto.setNickName(user.getNickName() != null ? user.getNickName() : user.getEmail());
@@ -75,19 +75,19 @@ public class UserMapper {
         dto.setStatus(user.getStatus());
         dto.setHasUnseenMessageToCurrentUser(hasUnseen);
         dto.setImageUrl(user.getImageUrl());
-
+        
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setContactNumber(user.getContactNumber());
-
+        
         return dto;
     }
-
+    
     public UserDTO toSummaryDTO(User user) {
         if (user == null) {
             return null;
         }
-
+        
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setNickName(user.getNickName() != null ? user.getNickName() : user.getEmail());
@@ -106,7 +106,7 @@ public class UserMapper {
         dto.setContactNumber(user.getContactNumber());
         return dto;
     }
-
+    
     public UserDTO toDTOWithoutLiveCounts(User user) {
         if (user == null) {
             return null;
@@ -136,7 +136,8 @@ public class UserMapper {
         userDTO.setNumber(user.getPhoneNumber());
         userDTO.setLinkedIn(user.getLinkedIn());
         userDTO.setPreferredRole(resolvePreferredRole(user));
-        userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        // userDTO.setIsFirstTimeAccessing(isFirstTimeAccessing(user));
+        userDTO.setIsFirstTimeAccessing(user.getPreferredRole() == null || user.getNickName() == null);
         userDTO.setIsAccountComplete(isAccountComplete(user));
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
