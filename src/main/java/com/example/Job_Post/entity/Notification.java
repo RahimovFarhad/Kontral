@@ -11,14 +11,20 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(indexes = {
+    @Index(name = "idx_notification_user_created_id", columnList = "user_id,created_at,id"),
+    @Index(name = "idx_notification_user_read_type_created_id", columnList = "user_id,is_read,notification_type,created_at,id")
+})
 @Data
 @Builder
 @NoArgsConstructor

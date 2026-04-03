@@ -1,8 +1,10 @@
 package com.example.Job_Post.service;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.ChatMessage;
@@ -37,6 +39,15 @@ public class ChatMessageService {
     }
 
     public List<ChatMessage> getChatMessages (Integer senderID, Integer recipientID){
+        return getChatMessages(senderID, recipientID, null, null);
+    }
+
+    public List<ChatMessage> getChatMessages(
+        Integer senderID,
+        Integer recipientID,
+        Instant before,
+        Integer limit
+    ) {
         if (senderID == null || recipientID == null) {
             throw new IllegalArgumentException("Sender ID and Recipient ID must not be null");
         }
@@ -47,7 +58,18 @@ public class ChatMessageService {
         if (chatRoom == null) {
             throw new IllegalArgumentException("Chat room not found");
         }
-        return chatMessageRepository.findByChatRoom(chatRoom);
+        int resolvedLimit = (limit == null) ? 50 : limit;
+        if (resolvedLimit < 1 || resolvedLimit > 200) {
+            throw new IllegalArgumentException("Limit must be between 1 and 200");
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, resolvedLimit);
+        List<ChatMessage> messages = (before == null)
+            ? chatMessageRepository.findByChatRoomOrderByTimestampDesc(chatRoom, pageRequest)
+            : chatMessageRepository.findByChatRoomAndTimestampLessThanOrderByTimestampDesc(chatRoom, before, pageRequest);
+
+        Collections.reverse(messages);
+        return messages;
     }
 
     public ChatMessage getChatMessageById(Integer id) {

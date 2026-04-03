@@ -1,8 +1,10 @@
 package com.example.Job_Post.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -44,6 +46,15 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Intege
     @EntityGraph(attributePaths = { "sender", "recipient", "chatRoom" })
     List<ChatMessage> findByChatRoom(ChatRoom chatRoom);
 
+    @EntityGraph(attributePaths = { "sender", "recipient", "chatRoom" })
+    List<ChatMessage> findByChatRoomOrderByTimestampDesc(ChatRoom chatRoom, Pageable pageable);
+
+    @EntityGraph(attributePaths = { "sender", "recipient", "chatRoom" })
+    List<ChatMessage> findByChatRoomAndTimestampLessThanOrderByTimestampDesc(
+        ChatRoom chatRoom,
+        Instant before,
+        Pageable pageable
+    );
 
     
 }

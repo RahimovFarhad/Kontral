@@ -7,9 +7,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,10 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Entity
+@Table(indexes = {
+    @Index(name = "idx_chat_message_room_time", columnList = "chat_room_id,timestamp"),
+    @Index(name = "idx_chat_message_recipient_read_sender", columnList = "recipient_id,is_read,sender_id")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessage {

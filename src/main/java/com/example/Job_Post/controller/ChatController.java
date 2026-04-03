@@ -1,6 +1,7 @@
 package com.example.Job_Post.controller;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -8,10 +9,12 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.Job_Post.dto.ChatMessageDTO;
 import com.example.Job_Post.dto.ChatMessageMapper;
@@ -117,7 +120,13 @@ public class ChatController {
     }
 
     @GetMapping("/messages/{senderId}/{recipientId}")
-    public ResponseEntity<?> getChatMessages(@PathVariable Integer senderId, @PathVariable Integer recipientId, Principal principal) {
+    public ResponseEntity<?> getChatMessages(
+        @PathVariable Integer senderId,
+        @PathVariable Integer recipientId,
+        @RequestParam(required = false) Integer limit,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant before,
+        Principal principal
+    ) {
         try {
             User sender = userService.getUserById(senderId);
             User recipient = userService.getUserById(recipientId);
@@ -125,7 +134,7 @@ public class ChatController {
             if (!principal.getName().equals(recipient.getEmail()) && !principal.getName().equals(sender.getEmail())){
                 throw new IllegalAccessError("This user cannot read these messages");
             }
-            List<ChatMessageDTO> messages = chatMessageService.getChatMessages(senderId, recipientId).stream()
+            List<ChatMessageDTO> messages = chatMessageService.getChatMessages(senderId, recipientId, before, limit).stream()
                 .map(chatMessageMapper::toDTO)
                 .toList();
             return ResponseEntity.ok(messages);

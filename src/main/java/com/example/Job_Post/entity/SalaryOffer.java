@@ -7,7 +7,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(indexes = {
+    @Index(name = "idx_salary_offer_negotiation_id_desc", columnList = "negotiation_id,id")
+})
 public class SalaryOffer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

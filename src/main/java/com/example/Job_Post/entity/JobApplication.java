@@ -33,7 +33,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "job_application", indexes = {
     @Index(name = "idx_application_user", columnList = "user_id"),
-    @Index(name = "idx_application_post", columnList = "post_id")
+    @Index(name = "idx_application_post", columnList = "post_id"),
+    @Index(name = "idx_job_application_user_withdrawn_status_applied", columnList = "user_id,is_withdrawn,status,applied_at"),
+    @Index(name = "idx_job_application_post_withdrawn_applied", columnList = "post_id,is_withdrawn,applied_at")
     
 })
 public class JobApplication {

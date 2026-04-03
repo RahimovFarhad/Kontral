@@ -9,6 +9,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -26,6 +27,11 @@ import lombok.NoArgsConstructor;
 @Table(
     uniqueConstraints = {
         @UniqueConstraint(name = "uk_review_job_application_writer", columnNames = {"job_application_id", "writer_id"})
+    },
+    indexes = {
+        @Index(name = "idx_review_receiver", columnList = "receiver_id"),
+        @Index(name = "idx_review_receiver_rating", columnList = "receiver_id,rating"),
+        @Index(name = "idx_review_writer", columnList = "writer_id")
     }
 )
 public class Review {
