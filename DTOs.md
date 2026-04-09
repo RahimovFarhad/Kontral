@@ -188,6 +188,7 @@ This file documents request/response payloads used by frontend.
 - `hasUnseenMessageToCurrentUser: boolean`
 - `relationship: ChatRelationshipStatus`
 - `chatState: ChatState | null` (`REQUEST_PENDING` | `ACTIVE` | `BLOCKED`)
+- `isPendingChatInitiatedByMe: Boolean` 
 
 ### UserWebSocketDTO
 - `id: Integer`

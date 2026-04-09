@@ -201,6 +201,7 @@ public class UserService {
 
                     ChatUserDTO dto = userMapper.toChatDTO(otherUser, false);
                     dto.setChatState(resolveChatState(chatRoom.getChatState()));
+                    dto.setPendingChatInitiatedByMe(chatRoom.getRequestInitiatorId().equals(currentUser.getId()));
                     return dto;
                 })
                 .toList();
@@ -232,12 +233,12 @@ public class UserService {
 
         if ("active".equals(includeValue)) {
             return users.stream()
-                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()))
+                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()) || user.isPendingChatInitiatedByMe() )
                 .toList();
         }
         if ("pending".equals(includeValue)) {
             return users.stream()
-                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()))
+                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()) && !user.isPendingChatInitiatedByMe())
                 .toList();
         }
         if ("blocked".equals(includeValue)) {

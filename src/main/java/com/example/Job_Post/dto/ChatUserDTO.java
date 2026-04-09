@@ -24,6 +24,7 @@ public class ChatUserDTO {
     private boolean hasUnseenMessageToCurrentUser;
     private ChatRelationshipStatus relationship;
     private ChatState chatState;
+    private boolean isPendingChatInitiatedByMe=false;
 
     public ChatUserDTO(Integer id, String nickName, String imageUrl, Status status, String email) {
         this.id = id;
