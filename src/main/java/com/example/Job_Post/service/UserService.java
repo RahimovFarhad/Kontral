@@ -191,6 +191,18 @@ public class UserService {
             chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
 
         List<ChatRoom> visibleRooms = chatRoomRepository.findVisibleChatRoomsForUser(currentUser.getId());
+        Map<Integer, Boolean> pendingInitiatedByCurrentUserByOtherUserId = new HashMap<>();
+
+        for (ChatRoom room : visibleRooms) {
+            Integer otherUserId = room.getUser1().getId().equals(currentUser.getId())
+                ? room.getUser2().getId()
+                : room.getUser1().getId();
+            ChatState state = resolveChatState(room.getChatState());
+            boolean pendingInitiatedByCurrentUser =
+                ChatState.REQUEST_PENDING.equals(state)
+                && currentUser.getId().equals(room.getRequestInitiatorId());
+            pendingInitiatedByCurrentUserByOtherUserId.put(otherUserId, pendingInitiatedByCurrentUser);
+        }
 
         List<ChatUserDTO> users = visibleRooms
                 .stream()
@@ -201,7 +213,6 @@ public class UserService {
 
                     ChatUserDTO dto = userMapper.toChatDTO(otherUser, false);
                     dto.setChatState(resolveChatState(chatRoom.getChatState()));
-                    dto.setPendingChatInitiatedByMe(chatRoom.getRequestInitiatorId().equals(currentUser.getId()));
                     return dto;
                 })
                 .toList();
@@ -233,12 +244,18 @@ public class UserService {
 
         if ("active".equals(includeValue)) {
             return users.stream()
-                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()) || user.isPendingChatInitiatedByMe() )
+                .filter(user ->
+                    ChatState.ACTIVE.equals(user.getChatState())
+                    || Boolean.TRUE.equals(pendingInitiatedByCurrentUserByOtherUserId.get(user.getId()))
+                )
                 .toList();
         }
         if ("pending".equals(includeValue)) {
             return users.stream()
-                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()) && !user.isPendingChatInitiatedByMe())
+                .filter(user ->
+                    ChatState.REQUEST_PENDING.equals(user.getChatState())
+                    && !Boolean.TRUE.equals(pendingInitiatedByCurrentUserByOtherUserId.get(user.getId()))
+                )
                 .toList();
         }
         if ("blocked".equals(includeValue)) {
