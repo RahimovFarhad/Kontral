@@ -76,6 +76,7 @@ This file documents request/response payloads used by frontend.
 - `salaryCurrency: String`
 - `salaryFrequency: String`
 - `isNegotiable: Boolean`
+- `toolkitExists: Boolean` (default: `false`)
 - `serviceDeliveryDays: Integer`
 - `serviceRevisionCount: Integer`
 - `serviceIncludes: String`
@@ -186,6 +187,7 @@ This file documents request/response payloads used by frontend.
 - `contactNumber: String`
 - `hasUnseenMessageToCurrentUser: boolean`
 - `relationship: ChatRelationshipStatus`
+- `chatState: ChatState | null` (`REQUEST_PENDING` | `ACTIVE` | `BLOCKED`)
 
 ### UserWebSocketDTO
 - `id: Integer`
@@ -199,6 +201,11 @@ This file documents request/response payloads used by frontend.
 - `totalPages: int`
 - `totalItems: long`
 - `pageSize: int`
+
+### ChatState (Messaging flow)
+- `REQUEST_PENDING`: chat request exists, not accepted yet
+- `ACTIVE`: normal two-way chat
+- `BLOCKED`: chat is blocked
 
 ### DashboardSummaryDTO
 - `preferredRole: String` (`EMPLOYER` | `EMPLOYEE` | `All`)
@@ -285,3 +292,51 @@ This file documents request/response payloads used by frontend.
 - Multipart keys:
 - `post`: JSON payload matching `PostDTO`
 - `images`: repeated file parts (up to 5)
+
+## Chat Request/Block Contract
+
+### Chat users list
+- `GET /api/v1/user/chat/users`
+- New optional query param: `include`
+- Allowed values (case-insensitive):
+- `all` (default; also used when omitted or invalid)
+- `active`
+- `pending`
+- `blocked`
+- Response item shape remains `ChatUserDTO`; now includes `chatState`.
+- `chatState` can be `null` when no visible room exists with that user.
+
+### Request acceptance
+- `POST /api/v1/chat/{otherUserId}/accept`
+- Auth required.
+- Success response: `200 OK` with body `ACTIVE` (enum string from backend).
+- Rules:
+- Only non-initiator can accept.
+- If chat is blocked, accept fails.
+
+### Block / Unblock
+- `POST /api/v1/chat/{otherUserId}/block`
+- Success response: `200 OK`, body: `"Chat blocked"`
+- `POST /api/v1/chat/{otherUserId}/unblock`
+- Success response: `200 OK`, body: `"Chat unblocked"`
+
+### Message sending behavior change
+- Existing send path remains the same (`/app/chat` STOMP mapping with `ChatMessageDTO` payload).
+- New rule:
+- If room is `REQUEST_PENDING`, only `requestInitiator` can send until accepted.
+- No auto-accept on first reply anymore.
+
+### Error messages frontend should handle
+- Message send blocked by state:
+- `"Messages are blocked in this chat"`
+- Message send before explicit accept:
+- `"Chat request must be accepted before replying"`
+- Accept rule violations:
+- `"Cannot accept a blocked chat"`
+- `"Request initiator cannot accept own request"`
+- Unblock rule violation:
+- `"Only blocker can unblock this chat"`
+- REST wrapper format for controller errors:
+- `Failed to block chat: <reason>`
+- `Failed to unblock chat: <reason>`
+- `Failed to accept chat request: <reason>`

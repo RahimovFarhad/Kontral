@@ -133,6 +133,7 @@ public class PostService {
         post.setSalaryCurrency(request.getSalaryCurrency());
         post.setSalaryFrequency(request.getSalaryFrequency());
         post.setIsNegotiable(request.getIsNegotiable());
+        post.setToolkitExists(Boolean.TRUE.equals(request.getToolkitExists()));
         post.setServiceDeliveryDays(request.getServiceDeliveryDays());
         post.setServiceRevisionCount(request.getServiceRevisionCount());
         post.setServiceIncludes(request.getServiceIncludes());

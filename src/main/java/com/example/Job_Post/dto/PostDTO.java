@@ -45,6 +45,7 @@ public class PostDTO {
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isNegotiable; // e.g., true if salary is negotiable
+    private Boolean toolkitExists;
     @JsonDeserialize(using = NullableIntegerDeserializer.class)
     private Integer serviceDeliveryDays;
     @JsonDeserialize(using = NullableIntegerDeserializer.class)

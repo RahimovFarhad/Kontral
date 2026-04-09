@@ -13,15 +13,18 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.Job_Post.dto.ChatMessageDTO;
 import com.example.Job_Post.dto.ChatMessageMapper;
+import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.dto.UserWebSocketDTO;
 import com.example.Job_Post.entity.ChatMessage;
 import com.example.Job_Post.entity.ChatNotification;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.ChatState;
 import com.example.Job_Post.repository.UserRepository;
 import com.example.Job_Post.service.ChatMessageService;
 import com.example.Job_Post.service.ChatRoomService;
@@ -92,6 +95,14 @@ public class ChatController {
             throw new IllegalArgumentException("Cannot send message to yourself");
         }
 
+        chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), false)
+            .ifPresent(chatRoom -> {
+                if (ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())
+                    && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
+                    throw new IllegalStateException("Chat request must be accepted before replying");
+                }
+            });
+
         ChatMessage savedMessage = chatMessageService.saveMessage(chatMessage);
 
         // Send to recipient
@@ -157,6 +168,52 @@ public class ChatController {
             return ResponseEntity.ok("Chat deleted for current user");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to delete chat: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{otherUserId}/block")
+    public ResponseEntity<?> blockChat(@PathVariable Integer otherUserId, Principal principal) {
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("User not authenticated");
+            }
+
+            User currentUser = userService.getUserByEmail(principal.getName());
+            chatRoomService.blockChat(currentUser.getId(), otherUserId);
+            return ResponseEntity.ok("Chat blocked");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to block chat: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{otherUserId}/unblock")
+    public ResponseEntity<?> unblockChat(@PathVariable Integer otherUserId, Principal principal) {
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("User not authenticated");
+            }
+
+            User currentUser = userService.getUserByEmail(principal.getName());
+            chatRoomService.unblockChat(currentUser.getId(), otherUserId);
+            return ResponseEntity.ok("Chat unblocked");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to unblock chat: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{otherUserId}/accept")
+    public ResponseEntity<?> acceptChatRequest(@PathVariable Integer otherUserId, Principal principal) {
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("User not authenticated");
+            }
+
+            User currentUser = userService.getUserByEmail(principal.getName());
+            ChatRoom room = chatRoomService.acceptChatRequest(currentUser.getId(), otherUserId)
+                .orElseThrow(() -> new IllegalStateException("Chat room not found"));
+            return ResponseEntity.ok(room.getChatState());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to accept chat request: " + e.getMessage());
         }
     }
 

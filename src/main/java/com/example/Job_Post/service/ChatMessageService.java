@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.ChatMessage;
 import com.example.Job_Post.entity.ChatRoom;
+import com.example.Job_Post.enumerator.ChatState;
 import com.example.Job_Post.repository.ChatMessageRepository;
 
 import jakarta.transaction.Transactional;
@@ -30,10 +31,20 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), true)
             .orElseThrow(() -> new IllegalStateException("Chat room could not be created"));
 
+        ChatState chatState = chatRoom.getChatState();
+        if (ChatState.BLOCKED.equals(chatState)) {
+            throw new IllegalStateException("Messages are blocked in this chat");
+        }
+
+        // if (ChatState.REQUEST_PENDING.equals(chatState)
+        //     && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
+        //     chatRoom.setChatState(ChatState.ACTIVE);
+        //     chatRoom.setBlockedByUserId(null);
+        // }
+
         chatMessage.setChatRoom(chatRoom);
         chatMessage.setTimestamp(Instant.now());
         chatMessage.setIsRead(false); // Default to unread
-
 
         return chatMessageRepository.save(chatMessage);
     }

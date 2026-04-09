@@ -76,6 +76,8 @@ public class Post {
     private String salaryCurrency; // e.g., "USD", "EUR"
     private String salaryFrequency; // e.g., "per year", "per hour", "total"
     private Boolean isNegotiable; // e.g., true if salary is negotiable
+    @Builder.Default
+    private Boolean toolkitExists = false;
 
     private Integer serviceDeliveryDays;
     private Integer serviceRevisionCount;

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
+import com.example.Job_Post.enumerator.ChatState;
 import com.example.Job_Post.repository.ChatRoomRepository;
 
 import jakarta.transaction.Transactional;
@@ -65,10 +66,67 @@ public class ChatRoomService {
         ChatRoom senderRecipient = ChatRoom.builder()
             .user1(user1)
             .user2(user2)
-            .chatId(chatId) 
+            .chatId(chatId)
+            .chatState(ChatState.REQUEST_PENDING)
+            .requestInitiatorId(senderId)
             .build();
 
         return chatRoomRepository.save(senderRecipient);
+    }
+
+    @Transactional
+    public ChatRoom blockChat(Integer currentUserId, Integer otherUserId) {
+        ChatRoom chatRoom = getChatRoom(currentUserId, otherUserId, true)
+            .orElseThrow(() -> new IllegalStateException("Chat room could not be created"));
+        chatRoom.setChatState(ChatState.BLOCKED);
+        chatRoom.setBlockedByUserId(currentUserId);
+        return chatRoomRepository.save(chatRoom);
+    }
+
+    @Transactional
+    public Optional<ChatRoom> unblockChat(Integer currentUserId, Integer otherUserId) {
+        Optional<ChatRoom> chatRoomOptional = getChatRoom(currentUserId, otherUserId, false);
+        if (chatRoomOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        ChatRoom chatRoom = chatRoomOptional.get();
+        if (!ChatState.BLOCKED.equals(chatRoom.getChatState())) {
+            return Optional.of(chatRoom);
+        }
+
+        if (chatRoom.getBlockedByUserId() != null && !currentUserId.equals(chatRoom.getBlockedByUserId())) {
+            throw new IllegalStateException("Only blocker can unblock this chat");
+        }
+
+        chatRoom.setChatState(ChatState.ACTIVE);
+        chatRoom.setBlockedByUserId(null);
+        return Optional.of(chatRoomRepository.save(chatRoom));
+    }
+
+    @Transactional
+    public Optional<ChatRoom> acceptChatRequest(Integer currentUserId, Integer otherUserId) {
+        Optional<ChatRoom> chatRoomOptional = getChatRoom(currentUserId, otherUserId, false);
+        if (chatRoomOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        ChatRoom chatRoom = chatRoomOptional.get();
+        if (ChatState.BLOCKED.equals(chatRoom.getChatState())) {
+            throw new IllegalStateException("Cannot accept a blocked chat");
+        }
+
+        if (!ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())) {
+            return Optional.of(chatRoom);
+        }
+
+        if (currentUserId.equals(chatRoom.getRequestInitiatorId())) {
+            throw new IllegalStateException("Request initiator cannot accept own request");
+        }
+
+        chatRoom.setChatState(ChatState.ACTIVE);
+        chatRoom.setBlockedByUserId(null);
+        return Optional.of(chatRoomRepository.save(chatRoom));
     }
 
     @Transactional

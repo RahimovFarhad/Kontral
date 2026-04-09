@@ -17,6 +17,7 @@ import com.example.Job_Post.dto.UserMapper;
 import com.example.Job_Post.entity.ChatRoom;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.ChatRelationshipStatus;
+import com.example.Job_Post.enumerator.ChatState;
 import com.example.Job_Post.enumerator.PreferredRole;
 import com.example.Job_Post.enumerator.Status;
 import com.example.Job_Post.repository.ChatMessageRepository;
@@ -171,6 +172,10 @@ public class UserService {
     }
 
     public List<ChatUserDTO> getChatUsers() {
+        return getChatUsers("all");
+    }
+
+    public List<ChatUserDTO> getChatUsers(String include) {
         User currentUser = cUser.get();
 
         Set<Integer> sendersWithUnread =
@@ -182,6 +187,8 @@ public class UserService {
                 currentUser.getId(),
                 users.stream().map(ChatUserDTO::getId).toList()
             );
+        Map<Integer, ChatState> chatStateByUserId = buildChatStateByOtherUserId(currentUser.getId());
+        String includeValue = include == null ? "all" : include.trim().toLowerCase();
 
         // Set the unseen message flag
         for (ChatUserDTO u : users) {
@@ -191,6 +198,23 @@ public class UserService {
             u.setRelationship(
                 relationshipByUserId.getOrDefault(u.getId(), ChatRelationshipStatus.NONE)
             );
+            u.setChatState(chatStateByUserId.get(u.getId()));
+        }
+
+        if ("active".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()))
+                .toList();
+        }
+        if ("pending".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()))
+                .toList();
+        }
+        if ("blocked".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.BLOCKED.equals(user.getChatState()))
+                .toList();
         }
 
         return users;
@@ -202,14 +226,18 @@ public class UserService {
         Set<Integer> sendersWithUnread =
             chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
 
-        List<ChatUserDTO> users = chatRoomRepository.findVisibleChatRoomsForUser(currentUser.getId())
+        List<ChatRoom> visibleRooms = chatRoomRepository.findVisibleChatRoomsForUser(currentUser.getId());
+
+        List<ChatUserDTO> users = visibleRooms
                 .stream()
                 .map( (ChatRoom chatRoom) -> {
                     User otherUser = chatRoom.getUser1().getId().equals(currentUser.getId())
                             ? chatRoom.getUser2()
                             : chatRoom.getUser1();
-                    
-                    return userMapper.toChatDTO(otherUser, false);
+
+                    ChatUserDTO dto = userMapper.toChatDTO(otherUser, false);
+                    dto.setChatState(resolveChatState(chatRoom.getChatState()));
+                    return dto;
                 })
                 .toList();
 
@@ -240,6 +268,21 @@ public class UserService {
 
         return users;
         
+    }
+
+    private Map<Integer, ChatState> buildChatStateByOtherUserId(Integer currentUserId) {
+        return chatRoomRepository.findVisibleChatRoomsForUser(currentUserId)
+            .stream()
+            .collect(HashMap::new, (map, room) -> {
+                Integer otherUserId = room.getUser1().getId().equals(currentUserId)
+                    ? room.getUser2().getId()
+                    : room.getUser1().getId();
+                map.put(otherUserId, resolveChatState(room.getChatState()));
+            }, HashMap::putAll);
+    }
+
+    private ChatState resolveChatState(ChatState state) {
+        return state == null ? ChatState.ACTIVE : state;
     }
 
     private Map<Integer, Integer> toCountMap(List<Object[]> rows) {

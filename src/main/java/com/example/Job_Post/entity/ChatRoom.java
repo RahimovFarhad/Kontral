@@ -2,7 +2,11 @@ package com.example.Job_Post.entity;
 
 import java.time.Instant;
 
+import com.example.Job_Post.enumerator.ChatState;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -50,4 +54,12 @@ public class ChatRoom {
     private Instant user1DeletedAt;
 
     private Instant user2DeletedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ChatState chatState = ChatState.REQUEST_PENDING;
+
+    private Integer requestInitiatorId;
+
+    private Integer blockedByUserId;
 }

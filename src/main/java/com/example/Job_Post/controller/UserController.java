@@ -280,9 +280,9 @@ public class UserController {
     }
 
     @GetMapping("/chat/users")
-    public ResponseEntity<?> getChatUsers() {
+    public ResponseEntity<?> getChatUsers(@RequestParam(value = "include", required = false) String include) {
         try {
-            return ResponseEntity.ok(userService.getChatUsers());
+            return ResponseEntity.ok(userService.getChatUsers(include));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to retrieve chat users: " + e.getMessage());
         }
