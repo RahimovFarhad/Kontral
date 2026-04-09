@@ -288,15 +288,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/chat/my-users")
-    public ResponseEntity<?> getMyChatUsers() {
-        try {
-            return ResponseEntity.ok(userService.getMyChatUsers());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to retrieve chat users: " + e.getMessage());
-        }
-    }
-
     @GetMapping("/me")
     public ResponseEntity<?> getMyUser(Principal principal) {
         try {

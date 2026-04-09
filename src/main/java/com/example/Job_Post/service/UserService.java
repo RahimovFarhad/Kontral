@@ -172,56 +172,20 @@ public class UserService {
     }
 
     public List<ChatUserDTO> getChatUsers() {
-        return getChatUsers("all");
+        return getMyChatUsers("all");
     }
 
     public List<ChatUserDTO> getChatUsers(String include) {
-        User currentUser = cUser.get();
-
-        Set<Integer> sendersWithUnread =
-                chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
-
-        List<ChatUserDTO> users = userRepository.findAllChatUsersLight();
-        Map<Integer, ChatRelationshipStatus> relationshipByUserId =
-            userRelationshipTagService.getRelationshipMapForCurrentUser(
-                currentUser.getId(),
-                users.stream().map(ChatUserDTO::getId).toList()
-            );
-        Map<Integer, ChatState> chatStateByUserId = buildChatStateByOtherUserId(currentUser.getId());
-        String includeValue = include == null ? "all" : include.trim().toLowerCase();
-
-        // Set the unseen message flag
-        for (ChatUserDTO u : users) {
-            u.setHasUnseenMessageToCurrentUser(
-                    sendersWithUnread.contains(u.getId())
-            );
-            u.setRelationship(
-                relationshipByUserId.getOrDefault(u.getId(), ChatRelationshipStatus.NONE)
-            );
-            u.setChatState(chatStateByUserId.get(u.getId()));
-        }
-
-        if ("active".equals(includeValue)) {
-            return users.stream()
-                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()))
-                .toList();
-        }
-        if ("pending".equals(includeValue)) {
-            return users.stream()
-                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()))
-                .toList();
-        }
-        if ("blocked".equals(includeValue)) {
-            return users.stream()
-                .filter(user -> ChatState.BLOCKED.equals(user.getChatState()))
-                .toList();
-        }
-
-        return users;
+        return getMyChatUsers(include);
     }
 
     public List<ChatUserDTO> getMyChatUsers() {
+        return getMyChatUsers("all");
+    }
+
+    public List<ChatUserDTO> getMyChatUsers(String include) {
         User currentUser = cUser.get();
+        String includeValue = include == null ? "all" : include.trim().toLowerCase();
 
         Set<Integer> sendersWithUnread =
             chatMessageRepository.findSendersWithUnreadMessages(currentUser.getId());
@@ -266,19 +230,24 @@ public class UserService {
             
         }
 
+        if ("active".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.ACTIVE.equals(user.getChatState()))
+                .toList();
+        }
+        if ("pending".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.REQUEST_PENDING.equals(user.getChatState()))
+                .toList();
+        }
+        if ("blocked".equals(includeValue)) {
+            return users.stream()
+                .filter(user -> ChatState.BLOCKED.equals(user.getChatState()))
+                .toList();
+        }
+
         return users;
         
-    }
-
-    private Map<Integer, ChatState> buildChatStateByOtherUserId(Integer currentUserId) {
-        return chatRoomRepository.findVisibleChatRoomsForUser(currentUserId)
-            .stream()
-            .collect(HashMap::new, (map, room) -> {
-                Integer otherUserId = room.getUser1().getId().equals(currentUserId)
-                    ? room.getUser2().getId()
-                    : room.getUser1().getId();
-                map.put(otherUserId, resolveChatState(room.getChatState()));
-            }, HashMap::putAll);
     }
 
     private ChatState resolveChatState(ChatState state) {

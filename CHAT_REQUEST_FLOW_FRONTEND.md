@@ -34,6 +34,7 @@ Behavior:
 - If invalid value is passed, backend falls back to `all`.
 
 Response shape remains `ChatUserDTO[]`, now with `chatState`.
+Returned list is the current user's visible chat counterparts (not all platform users).
 
 ---
 

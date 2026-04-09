@@ -305,6 +305,7 @@ This file documents request/response payloads used by frontend.
 - `blocked`
 - Response item shape remains `ChatUserDTO`; now includes `chatState`.
 - `chatState` can be `null` when no visible room exists with that user.
+- Endpoint now returns current user's visible chat counterparts (previous `/chat/my-users` behavior).
 
 ### Request acceptance
 - `POST /api/v1/chat/{otherUserId}/accept`
