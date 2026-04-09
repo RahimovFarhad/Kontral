@@ -79,55 +79,65 @@ public class ChatController {
 
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessageDTO chatMessageDTO, Principal principal) {
+        try {
+            if (principal == null) {
+                throw new IllegalStateException("User not authenticated");
+            }
 
-        if (principal == null) {
-            throw new IllegalStateException("User not authenticated");
+            String username = principal.getName();
+
+            User sender = userService.getUserByEmail(username);
+
+            ChatMessage chatMessage = chatMessageMapper.toEntity(chatMessageDTO);
+            chatMessage.setSender(sender);
+
+            if (chatMessage.getSender().getId().equals(chatMessage.getRecipient().getId())) {
+                throw new IllegalArgumentException("Cannot send message to yourself");
+            }
+
+            chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), false)
+                .ifPresent(chatRoom -> {
+                    if (ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())
+                        && chatRoom.getRequestInitiatorId() != null
+                        && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
+                        throw new IllegalStateException("Chat request must be accepted before replying");
+                    }
+                });
+
+            ChatMessage savedMessage = chatMessageService.saveMessage(chatMessage);
+
+            // Send to recipient
+            messagingTemplate.convertAndSendToUser(
+                savedMessage.getRecipient().getEmail(),
+                "/queue/messages",
+                ChatNotification.builder()
+                    .id(savedMessage.getId())
+                    .senderId(savedMessage.getSender().getId())
+                    .recipientId(savedMessage.getRecipient().getId())
+                    .content(savedMessage.getContent())
+                    .timestamp(savedMessage.getTimestamp())
+                    .build()
+            );
+
+            // Send confirmation to sender (replace tempId)
+            messagingTemplate.convertAndSendToUser(
+                savedMessage.getSender().getEmail(),
+                "/queue/sentMessage",
+                ChatNotification.builder()
+                    .tempId(chatMessageDTO.getTempId())
+                    .id(savedMessage.getId())
+                    .timestamp(savedMessage.getTimestamp())
+                    .build()
+            );
+        } catch (Exception e) {
+            if (principal != null) {
+                messagingTemplate.convertAndSendToUser(
+                    principal.getName(),
+                    "/queue/errors",
+                    "Failed to send message: " + e.getMessage()
+                );
+            }
         }
-
-        String username = principal.getName();
-
-        User sender = userService.getUserByEmail(username);
-
-        ChatMessage chatMessage = chatMessageMapper.toEntity(chatMessageDTO);
-        chatMessage.setSender(sender);
-
-        if (chatMessage.getSender().getId().equals(chatMessage.getRecipient().getId())) {
-            throw new IllegalArgumentException("Cannot send message to yourself");
-        }
-
-        chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), false)
-            .ifPresent(chatRoom -> {
-                if (ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())
-                    && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
-                    throw new IllegalStateException("Chat request must be accepted before replying");
-                }
-            });
-
-        ChatMessage savedMessage = chatMessageService.saveMessage(chatMessage);
-
-        // Send to recipient
-        messagingTemplate.convertAndSendToUser(
-            savedMessage.getRecipient().getEmail(),
-            "/queue/messages",
-            ChatNotification.builder()
-                .id(savedMessage.getId())
-                .senderId(savedMessage.getSender().getId())
-                .recipientId(savedMessage.getRecipient().getId())
-                .content(savedMessage.getContent())
-                .timestamp(savedMessage.getTimestamp())
-                .build()
-        );
-
-        // Send confirmation to sender (replace tempId)
-        messagingTemplate.convertAndSendToUser(
-            savedMessage.getSender().getEmail(),
-            "/queue/sentMessage",
-            ChatNotification.builder()
-                .tempId(chatMessageDTO.getTempId())
-                .id(savedMessage.getId())
-                .timestamp(savedMessage.getTimestamp())
-                .build()
-        );
     }
 
     @GetMapping("/messages/{senderId}/{recipientId}")
