@@ -288,6 +288,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/chat/search")
+    public ResponseEntity<?> searchChatUsers(@RequestParam("q") String query) {
+        try {
+            return ResponseEntity.ok(userService.searchChatUsers(query));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to search users: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getMyUser(Principal principal) {
         try {

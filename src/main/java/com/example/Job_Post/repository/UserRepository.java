@@ -4,6 +4,7 @@ package com.example.Job_Post.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -66,6 +67,31 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     from User u
     """)
     List<ChatUserDTO> findAllChatUsersLight();
+
+    @Query("""
+    select new com.example.Job_Post.dto.ChatUserDTO(
+        u.id,
+        u.nickName,
+        u.imageUrl,
+        u.status,
+        u.email
+    )
+    from User u
+    where u.verified = true
+      and u.id <> :currentUserId
+      and (
+        lower(u.nickName) like lower(concat('%', :term, '%'))
+        or lower(u.email) like lower(concat('%', :term, '%'))
+        or lower(u.firstName) like lower(concat('%', :term, '%'))
+        or lower(u.lastName) like lower(concat('%', :term, '%'))
+      )
+    order by u.nickName asc
+    """)
+    List<ChatUserDTO> searchChatableUsers(
+        @Param("term") String term,
+        @Param("currentUserId") Integer currentUserId,
+        Pageable pageable
+    );
 
 
 

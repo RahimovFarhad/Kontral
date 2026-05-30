@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -169,6 +170,24 @@ public class UserService {
         }
 
         return userRepository.existsByNickNameIgnoreCaseAndIdNot(nickName.trim(), currentUserId);
+    }
+
+    private static final int CHAT_SEARCH_MIN_TERM_LENGTH = 2;
+    private static final int CHAT_SEARCH_MAX_RESULTS = 20;
+
+    // Search for users to start a new chat with (by nickname, email or name).
+    public List<ChatUserDTO> searchChatUsers(String query) {
+        String term = query == null ? "" : query.trim();
+        if (term.length() < CHAT_SEARCH_MIN_TERM_LENGTH) {
+            return List.of();
+        }
+
+        User currentUser = cUser.get();
+        return userRepository.searchChatableUsers(
+            term,
+            currentUser.getId(),
+            PageRequest.of(0, CHAT_SEARCH_MAX_RESULTS)
+        );
     }
 
     public List<ChatUserDTO> getChatUsers() {
