@@ -43,6 +43,20 @@ public class ChatRoomService {
             });
     }
 
+    public Optional<ChatRoom> getChatRoom(User sender, User recipient, boolean createNewRoomIfNotExists) {
+        if (sender == null || recipient == null) {
+            throw new IllegalArgumentException("Sender and Recipient must not be null");
+        }
+
+        return chatRoomRepository.findByChatId(generateChatId(sender.getId(), recipient.getId()))
+            .or(() -> {
+                if (createNewRoomIfNotExists) {
+                    return Optional.of(createChatRoom(sender, recipient));
+                }
+                return Optional.empty();
+            });
+    }
+
     private String generateChatId(Integer senderId, Integer recipientId) {
         Integer id1 = Math.max(senderId, recipientId);
         Integer id2 = Math.min(senderId, recipientId);
@@ -72,6 +86,24 @@ public class ChatRoomService {
             .build();
 
         return chatRoomRepository.save(senderRecipient);
+    }
+
+    private ChatRoom createChatRoom(User sender, User recipient) {
+        if (sender.getId().equals(recipient.getId())) {
+            throw new IllegalArgumentException("Sender ID and Recipient ID must be different");
+        }
+
+        String chatId = generateChatId(sender.getId(), recipient.getId());
+
+        ChatRoom chatRoom = ChatRoom.builder()
+            .user1(recipient)
+            .user2(sender)
+            .chatId(chatId)
+            .chatState(ChatState.REQUEST_PENDING)
+            .requestInitiatorId(sender.getId())
+            .build();
+
+        return chatRoomRepository.save(chatRoom);
     }
 
     @Transactional

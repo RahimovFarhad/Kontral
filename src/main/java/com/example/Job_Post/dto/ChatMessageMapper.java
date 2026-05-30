@@ -3,15 +3,13 @@ package com.example.Job_Post.dto;
 import org.springframework.stereotype.Component;
 
 import com.example.Job_Post.entity.ChatMessage;
-import com.example.Job_Post.service.UserService;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Component
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class ChatMessageMapper {
-    private final UserService userService;
-    
+
     public ChatMessageDTO toDTO(ChatMessage chatMessage) {
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setRecipientId(chatMessage.getRecipient().getId());
@@ -28,10 +26,8 @@ public class ChatMessageMapper {
     public ChatMessage toEntity(ChatMessageDTO dto) {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setContent(dto.getContent());
-        // Assuming you have methods to fetch User entities by ID
-        chatMessage.setRecipient(userService.getUserById(dto.getRecipientId()));
         chatMessage.setIsRead(dto.getIsRead());
-        // Set chatRoom based on chatRoomId if necessary
+        // Caller is responsible for setting sender and recipient
         return chatMessage;
     }
 

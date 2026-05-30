@@ -87,22 +87,15 @@ public class ChatController {
             String username = principal.getName();
 
             User sender = userService.getUserByEmail(username);
+            User recipient = userService.getUserById(chatMessageDTO.getRecipientId());
 
             ChatMessage chatMessage = chatMessageMapper.toEntity(chatMessageDTO);
             chatMessage.setSender(sender);
+            chatMessage.setRecipient(recipient);
 
             if (chatMessage.getSender().getId().equals(chatMessage.getRecipient().getId())) {
                 throw new IllegalArgumentException("Cannot send message to yourself");
             }
-
-            chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), false)
-                .ifPresent(chatRoom -> {
-                    if (ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())
-                        && chatRoom.getRequestInitiatorId() != null
-                        && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
-                        throw new IllegalStateException("Chat request must be accepted before replying");
-                    }
-                });
 
             ChatMessage savedMessage = chatMessageService.saveMessage(chatMessage);
 

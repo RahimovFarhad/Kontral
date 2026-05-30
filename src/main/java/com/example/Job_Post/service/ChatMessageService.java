@@ -28,7 +28,7 @@ public class ChatMessageService {
             throw new IllegalArgumentException("Sender, Recipient, and content must not be null or empty");
         }
 
-        ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage.getSender().getId(), chatMessage.getRecipient().getId(), true)
+        ChatRoom chatRoom = chatRoomService.getChatRoom(chatMessage.getSender(), chatMessage.getRecipient(), true)
             .orElseThrow(() -> new IllegalStateException("Chat room could not be created"));
 
         ChatState chatState = chatRoom.getChatState();
@@ -41,6 +41,12 @@ public class ChatMessageService {
         //     chatRoom.setChatState(ChatState.ACTIVE);
         //     chatRoom.setBlockedByUserId(null);
         // }
+
+        if (ChatState.REQUEST_PENDING.equals(chatRoom.getChatState())
+                && chatRoom.getRequestInitiatorId() != null
+                && !chatMessage.getSender().getId().equals(chatRoom.getRequestInitiatorId())) {
+            throw new IllegalStateException("Chat request must be accepted before replying");
+        }
 
         chatMessage.setChatRoom(chatRoom);
         chatMessage.setTimestamp(Instant.now());
