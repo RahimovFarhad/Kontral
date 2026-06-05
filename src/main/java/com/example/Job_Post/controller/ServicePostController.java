@@ -92,11 +92,12 @@ public class ServicePostController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) String employmentType,
+            @RequestParam(required = false) String location,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @PageableDefault(size = 10) Pageable pageable) {
         try {
             Page<PostDTO> page = postService.getAllPosts(
-                    search, category, minPrice, employmentType, PostType.SERVICE_OFFER.toString(), sortBy, pageable);
+                    search, category, minPrice, employmentType, location, PostType.SERVICE_OFFER.toString(), sortBy, pageable);
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

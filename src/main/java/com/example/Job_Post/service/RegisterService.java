@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.Job_Post.auth.RegisterRequest;
+import com.example.Job_Post.config.CookieFactory;
 import com.example.Job_Post.entity.ResetToken;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.ResetTokenRepository;
@@ -36,6 +37,7 @@ public class RegisterService {
 
     private final ResetTokenRepository resetTokenRepository;
     private final RefreshTokenService refreshTokenService;
+    private final CookieFactory cookieFactory;
 
     private static final int verificationTokenByteLength = 32;
     private static final int verificationTokenExpiryMinute = 30;
@@ -216,13 +218,7 @@ public class RegisterService {
         String refreshToken = refreshTokenService.createRefreshToken(user);
 
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(true)
-                    .secure(true) // localhost
-                    .sameSite("None") // required for cross-origin
-                    .path("/")
-                    .maxAge(7 * 24 * 60 * 60)
-                    .build();
+        ResponseCookie cookie = cookieFactory.refreshToken(refreshToken);
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 

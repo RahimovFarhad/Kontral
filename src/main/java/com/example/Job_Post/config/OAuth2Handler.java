@@ -28,6 +28,7 @@ public class OAuth2Handler {
 
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
+    private final CookieFactory cookieFactory;
 
 
     public void generateJwtForOAuth2User(Authentication authentication, HttpServletResponse response) {
@@ -49,14 +50,8 @@ public class OAuth2Handler {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
             String refreshToken = refreshTokenService.createRefreshToken(user);
 
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(true)
-                    .secure(true) 
-                    .sameSite("None") // required for cross-origin
-                    .path("/")
-                    .maxAge(7 * 24 * 60 * 60)
-                    .build();
-            
+            ResponseCookie cookie = cookieFactory.refreshToken(refreshToken);
+
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
             
 

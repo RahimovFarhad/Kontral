@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.example.Job_Post.auth.AuthenticationRequest;
 import com.example.Job_Post.auth.AuthenticationResponse;
 import com.example.Job_Post.auth.DeleteRequest;
+import com.example.Job_Post.config.CookieFactory;
 import com.example.Job_Post.config.JwtService;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.repository.UserRepository;
@@ -38,6 +39,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
+    private final CookieFactory cookieFactory;
 
 
     private static final int verificationTokenByteLength = 32;
@@ -78,13 +80,7 @@ public class AuthenticationService {
         String refreshToken = refreshTokenService.createRefreshToken(user);
         String accessToken = JwtService.generateToken(user, TokenType.ACCESS);
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                    .httpOnly(true)
-                    .secure(true) // localhost
-                    .sameSite("None") // required for cross-origin
-                    .path("/")
-                    .maxAge(7 * 24 * 60 * 60)
-                    .build();
+        ResponseCookie cookie = cookieFactory.refreshToken(refreshToken);
 
         response.setHeader("Set-Cookie", cookie.toString());
 

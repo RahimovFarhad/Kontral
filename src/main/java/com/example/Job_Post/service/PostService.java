@@ -197,15 +197,15 @@ public class PostService {
 
     @Transactional
     public Page<PostDTO> getAllPosts(Pageable pageable) {
-        return getAllPosts(null, null, null, null, "job_request", "newest", pageable);
+        return getAllPosts(null, null, null, null, null, "job_request", "newest", pageable);
     }
 
     @Transactional
-    public Page<PostDTO> getAllPosts(String search, String category, Integer minPrice, 
-                                String employmentType, String postType, String sortBy, Pageable pageable) {
-        
+    public Page<PostDTO> getAllPosts(String search, String category, Integer minPrice,
+                                String employmentType, String location, String postType, String sortBy, Pageable pageable) {
+
         // Create combined specification
-        var spec = PostSpecification.combineFilters(search, category, minPrice, employmentType, postType);
+        var spec = PostSpecification.combineFilters(search, category, minPrice, employmentType, location, postType);
         
         // Handle custom sorting
         if (sortBy != null && !sortBy.isEmpty()) {

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.Job_Post.config.CookieFactory;
 import com.example.Job_Post.config.JwtService;
 import com.example.Job_Post.entity.User;
 import com.example.Job_Post.enumerator.TokenType;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
     private final RefreshTokenService refreshTokenService;
+    private final CookieFactory cookieFactory;
 
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken() {
@@ -54,13 +56,7 @@ public class AuthController {
             String newAccess = JwtService.generateTokenByEmail(user.getEmail(), TokenType.ACCESS);
             String newRefresh = refreshTokenService.createRefreshToken(user);
 
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefresh)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60)
-                .build();
+            ResponseCookie cookie = cookieFactory.refreshToken(newRefresh);
 
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 

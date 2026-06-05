@@ -1,0 +1,1 @@
+import{j as t}from"./index-BZJxCf5k.js";import"./vendor-router-Mcnwvc-h.js";const x=({label:s,count:e,color:r})=>t.jsxs("div",{className:"text-center",children:[t.jsx("div",{className:`text-2xl font-bold ${r}`,children:e}),t.jsx("div",{className:"text-sm text-gray-600",children:s})]});export{x as A};

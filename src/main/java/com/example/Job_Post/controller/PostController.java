@@ -95,13 +95,14 @@ public class PostController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) String employmentType,
+            @RequestParam(required = false) String location,
             @RequestParam(required = false, defaultValue = "newest") String sortBy,
             @PageableDefault(size = 10) Pageable pageable,
             Principal principal
     ) {
-        try {            
+        try {
             Page<PostDTO> page = postService.getAllPosts(
-                search, category, minPrice, employmentType, PostType.JOB_REQUEST.toString(), sortBy, pageable
+                search, category, minPrice, employmentType, location, PostType.JOB_REQUEST.toString(), sortBy, pageable
             );
             
             PagedResponse<PostDTO> response = PagedResponse.formPage(page);

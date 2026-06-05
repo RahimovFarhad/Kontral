@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Job_Post.auth.DeleteRequest;
+import com.example.Job_Post.config.CookieFactory;
 import com.example.Job_Post.service.AuthenticationService;
 import com.example.Job_Post.service.RefreshTokenService;
 
@@ -29,6 +30,7 @@ public class DeleteController {
 
     private final AuthenticationService authenticationService;
     private final RefreshTokenService refreshTokenService;
+    private final CookieFactory cookieFactory;
 
 
     @DeleteMapping("/delete")
@@ -53,13 +55,7 @@ public class DeleteController {
                     .ifPresent(refreshTokenService::revokeRefreshToken);
             }
 
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
-                    .httpOnly(true)
-                    .secure(true) 
-                    .sameSite("None")
-                    .path("/")
-                    .maxAge(0)
-                    .build();
+            ResponseCookie cookie = cookieFactory.expiredRefreshToken();
 
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
